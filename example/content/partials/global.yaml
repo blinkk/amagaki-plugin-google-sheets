@@ -1,0 +1,26 @@
+sheet1: !GoogleSheet
+  spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c'
+  range: 'homepage'
+  cacheKey: 'homepage1'
+  # format: strings
+
+sheet2: !GoogleSheet
+  spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c'
+  range: 'homepage'
+  cacheKey: 'homepage2'
+  # format: strings
+
+about: !GoogleSheet
+  spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c'
+  range: 'about'
+  # format: strings
+
+about2: !GoogleSheet
+  spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c'
+  range: 'about'
+  # format: strings
+
+about3: !GoogleSheet
+  spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c'
+  range: 'about'
+  # format: strings}
