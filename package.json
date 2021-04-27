@@ -58,12 +58,16 @@
     "async": "^3.2.0",
     "cli-progress": "^3.8.2",
     "commander": "^5.1.0",
+    "connect-ensure-login": "^0.1.1",
+    "cookie-session": "^1.4.0",
     "express": "^4.17.1",
     "googleapis": "^67.1.0",
     "js-yaml": "^4.0.0",
     "marked": "^1.2.6",
     "mime-types": "^2.1.27",
-    "nunjucks": "^3.2.2"
+    "nunjucks": "^3.2.2",
+    "passport": "^0.4.1",
+    "passport-google-oauth20": "^2.0.0"
   },
   "files": [
     "dist/src"
