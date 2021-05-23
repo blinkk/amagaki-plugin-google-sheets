@@ -3,7 +3,12 @@ const fsPath = require('path');
 const yaml = require('js-yaml');
 const fs = require('fs');
 const {Builder} = require('@amagaki/amagaki/src/builder');
-const {sheets} = require('googleapis/build/src/apis/sheets');
+
+const Transformation = {
+  ROWS: 'rows',
+  GRID: 'grid',
+  STRINGS: 'strings',
+};
 
 function toStringFormat(pod, values) {
   const keysToStrings = {};
@@ -24,10 +29,31 @@ function toStringFormat(pod, values) {
   return keysToStrings;
 }
 
+function transform(pod, values, transformation) {
+  if (!transformation) {
+    return values;
+  }
+  const validTransformations = Object.values(Transformation);
+  if (!validTransformations.includes(transformation)) {
+    throw new Error(
+      `Invalid transformation "${transformation}". Valid transformations are: ${validTransformations.join(
+        ', '
+      )}`
+    );
+  }
+  if (transformation === Transformation.STRINGS) {
+    return toStringFormat(pod, values);
+  }
+  return values;
+}
+
 class GoogleSheetsPlugin {
-  constructor(pod, authPlugin) {
+  constructor(pod) {
     this.pod = pod;
-    this.authPlugin = authPlugin;
+    this.authPlugin = pod.plugins.get('GoogleAuthPlugin');
+    if (!this.authPlugin) {
+      throw new Error('Unable to find GoogleAuthPlugin');
+    }
   }
 
   getClient() {
@@ -67,11 +93,12 @@ class GoogleSheetsPlugin {
 
   async saveFile(options) {
     const podPath = options.podPath;
-    const result = await this.getValuesResponse({
+    const responseValues = await this.getValuesResponse({
       spreadsheetId: options.spreadsheetId,
       range: options.range,
     });
-    this.saveFileInternal(podPath, result);
+    const values = transform(this.pod, responseValues, options.transform);
+    this.saveFileInternal(podPath, values);
   }
 
   async bindCollection(options) {
@@ -93,7 +120,8 @@ class GoogleSheetsPlugin {
         options.collectionPath,
         `${valueRange.range.split('!')[0]}.yaml`
       );
-      this.saveFileInternal(podPath, valueRange.values);
+      const values = transform(this.pod, valueRange.values, options.transform);
+      this.saveFileInternal(podPath, values);
     });
   }
 
@@ -121,7 +149,7 @@ function register(pod, authPlugin) {
     construct: options => {
       return async () => {
         const resp = await sheetsPlugin.getValuesResponse(options);
-        if (options.format === 'strings') {
+        if (options.format === Transformation.STRINGS) {
           return toStringFormat(pod, resp);
         }
         return resp;

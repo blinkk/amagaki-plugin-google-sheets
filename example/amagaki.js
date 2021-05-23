@@ -2,13 +2,13 @@ const googleAuthPlugin = require('./plugins/google-auth');
 const googleSheetsPlugin = require('./plugins/google-sheets');
 
 module.exports = async function (pod, options) {
-  const authPlugin = googleAuthPlugin.register(pod, {
+  googleAuthPlugin.register(pod, {
     // clientId: options.clientId,
     // clientSecret: options.clientSecret,
     //sessionSecret: options.sessionSecret,
     keyFile: '/Users/jeremydw/Downloads/madebygoog-52e1c116d139.json',
   });
-  const sheetsPlugin = googleSheetsPlugin.register(pod, authPlugin);
+  const sheetsPlugin = googleSheetsPlugin.register(pod);
   await Promise.all([
     sheetsPlugin.saveFile({
       podPath: '/content/partials/foo.yaml',

@@ -27,7 +27,8 @@ class GoogleAuthPlugin {
 }
 
 function register(pod, options) {
-  const authPlugin = new GoogleAuthPlugin(pod, options);
+  pod.plugins.register(GoogleAuthPlugin, options);
+  const authPlugin = pod.plugins.get('GoogleAuthPlugin');
 
   const Urls = {
     CALLBACK: '/amagaki/oauth2callback',

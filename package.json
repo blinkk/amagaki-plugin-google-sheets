@@ -1,17 +1,14 @@
 {
   "name": "@amagaki/amagaki-plugin-google-sheets",
-  "bin": {
-    "amagaki": "./dist/src/index.js"
-  },
   "version": "0.0.1",
   "license": "MIT",
   "homepage": "https://amagaki.dev",
   "repository": {
     "type": "git",
-    "url": "git://github.com/blinkkcode/amagaki-plugin-google-sheets.git"
+    "url": "git://github.com/blinkk/amagaki-plugin-google-sheets.git"
   },
   "engines": {
-    "node": ">=11.14.0"
+    "node": ">=14"
   },
   "scripts": {
     "check": "gts check",
