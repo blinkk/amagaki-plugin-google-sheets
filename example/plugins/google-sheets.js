@@ -151,6 +151,9 @@ function transformToObjectRows(pod, values) {
   return objectRows;
 }
 
+/**
+ * Updates the pod's locale files with translations retrieved from the sheet.
+ */
 async function saveLocales(pod, keysToLocales) {
   const catalogsToMerge = {};
   for (const localesToStrings of Object.values(keysToLocales)) {
@@ -195,12 +198,20 @@ async function saveLocales(pod, keysToLocales) {
   }
 }
 
+/**
+ * Transforms the response from Google Sheets using an inbuilt transformation.
+ * Custom transformations can be used by supplying a function for the
+ * transformation instead one of the built-in transformation names.
+ */
 async function transform(pod, values, transformation) {
   if (!transformation) {
     return values;
   }
   const validTransformations = Object.values(Transformation);
-  if (!validTransformations.includes(transformation)) {
+  if (
+    !validTransformations.includes(transformation) &&
+    typeof transformation !== 'function'
+  ) {
     throw new Error(
       `Invalid transformation "${transformation}". Valid transformations are: ${validTransformations.join(
         ', '
@@ -215,16 +226,18 @@ async function transform(pod, values, transformation) {
     return transformToGrid(pod, values);
   } else if (transformation === Transformation.OBJECT_ROWS) {
     return transformToObjectRows(pod, values);
-  } else if (typeof tranformation === 'function') {
+  } else if (typeof transformation === 'function') {
     return transformation(values);
   }
   return values;
 }
 
 class GoogleSheetsPlugin {
-  constructor(pod) {
+  constructor(pod, authPluginOptions) {
     this.pod = pod;
-    this.authPlugin = pod.plugins.get('GoogleAuthPlugin');
+    this.authPlugin =
+      pod.plugins.get('GoogleAuthPlugin') ||
+      googleAuthPlugin.register(pod, authPluginOptions);
     if (!this.authPlugin) {
       throw new Error('Unable to find GoogleAuthPlugin');
     }
@@ -316,36 +329,7 @@ class GoogleSheetsPlugin {
 }
 
 function register(pod, authPluginOptions) {
-  const authPlugin =
-    pod.plugins.get('GoogleAuthPlugin') ||
-    googleAuthPlugin.register(pod, authPluginOptions);
-  const sheetsPlugin = new GoogleSheetsPlugin(pod, authPlugin);
-  const serverPlugin = pod.plugins.get('ServerPlugin');
-  serverPlugin.register(app => {
-    app.all('/foo', async (req, res) => {
-      const result = await sheetsPlugin.getValuesResponse({
-        spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c',
-        range: 'homepage',
-      });
-      res.send('This is a response from custom middleware.');
-    });
-  });
-
-  const yamlPlugin = pod.plugins.get('YamlPlugin');
-  yamlPlugin.addType('!GoogleSheet', {
-    kind: 'mapping',
-    construct: options => {
-      return async () => {
-        const resp = await sheetsPlugin.getValuesResponse(options);
-        if (options.format === Transformation.STRINGS) {
-          return transformToStrings(pod, resp);
-        }
-        return resp;
-      };
-    },
-  });
-
-  return sheetsPlugin;
+  return new GoogleSheetsPlugin(pod, authPluginOptions);
 }
 
 module.exports = {
