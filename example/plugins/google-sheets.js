@@ -1,4 +1,9 @@
 const {google} = require('googleapis');
+const fsPath = require('path');
+const yaml = require('js-yaml');
+const fs = require('fs');
+const {Builder} = require('@amagaki/amagaki/src/builder');
+const {sheets} = require('googleapis/build/src/apis/sheets');
 
 function toStringFormat(pod, values) {
   const keysToStrings = {};
@@ -25,12 +30,16 @@ class GoogleSheetsPlugin {
     this.authPlugin = authPlugin;
   }
 
+  getClient() {
+    const authClient = this.authPlugin.auth;
+    return google.sheets({version: 'v4', auth: authClient});
+  }
+
   async getValuesResponse(options) {
     console.log(
       `Fetching Google Sheet -> ${this.fomatGoogleSheetsUrl(options)}`
     );
-    const authClient = this.authPlugin.oauth2;
-    const sheets = google.sheets({version: 'v4', auth: authClient});
+    const sheets = this.getClient();
     const resp = (
       await sheets.spreadsheets.values.get({
         spreadsheetId: options.spreadsheetId,
@@ -38,6 +47,54 @@ class GoogleSheetsPlugin {
       })
     ).data.values;
     return resp;
+  }
+
+  async saveFileInternal(podPath, content) {
+    let rawContent;
+    if (podPath.endsWith('.json')) {
+      rawContent = JSON.stringify(content);
+    } else if (podPath.endsWith('.yaml')) {
+      rawContent = yaml.dump(content);
+    } else {
+      throw new Error(
+        `Cannot save file due to unsupported extenson -> ${podPath}`
+      );
+    }
+    const realPath = this.pod.getAbsoluteFilePath(podPath);
+    this.pod.builder.writeFileAsync(realPath, rawContent);
+    console.log(`Saved -> ${podPath}`);
+  }
+
+  async saveFile(options) {
+    const podPath = options.podPath;
+    const result = await this.getValuesResponse({
+      spreadsheetId: options.spreadsheetId,
+      range: options.range,
+    });
+    this.saveFileInternal(podPath, result);
+  }
+
+  async bindCollection(options) {
+    const realPath = this.pod.getAbsoluteFilePath(options.collectionPath);
+    // Actually "ensure directory exists for file".
+    Builder.ensureDirectoryExists(fsPath.join(realPath, '_collection.yaml'));
+    const existingFiles = fs.readdirSync(realPath).filter(path => {
+      return !path.startsWith('_');
+    });
+    const sheets = this.getClient();
+    const valueRanges = (
+      await sheets.spreadsheets.values.batchGet({
+        spreadsheetId: options.spreadsheetId,
+        ranges: options.ranges,
+      })
+    ).data.valueRanges;
+    valueRanges.forEach(valueRange => {
+      const podPath = fsPath.join(
+        options.collectionPath,
+        `${valueRange.range.split('!')[0]}.yaml`
+      );
+      this.saveFileInternal(podPath, valueRange.values);
+    });
   }
 
   fomatGoogleSheetsUrl(options) {

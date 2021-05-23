@@ -16,6 +16,7 @@ class GoogleAuthPlugin {
     // Used with service accounts (either keyFile or auto-configured).
     this.auth = new google.auth.GoogleAuth({
       scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+      keyFile: options.keyFile,
     });
     // Used with user accounts (via oauth2 flow).
     this.oauth2 = new google.auth.OAuth2(
@@ -43,6 +44,7 @@ function register(pod, options) {
     }
   }
 
+  /*
   const serverPlugin = pod.plugins.get('ServerPlugin');
   serverPlugin.register(app => {
     app.enable('trust proxy');
@@ -128,6 +130,7 @@ function register(pod, options) {
     app.use('*', ensureLoggedIn(Urls.LOGIN));
   });
 
+  */
   return authPlugin;
 }
 
