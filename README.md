@@ -15,20 +15,12 @@ npm install --save @amagaki/amagaki-plugin-google-sheets
 2. Add to `amagaki.js`.
 
 ```js
-const googleSheetsPlugin = require('./plugins/google-sheets');
+const googleAuth = require('@amagaki/amagaki-plugin-google-auth');
+const googleSheetsPlugin = require('@amagaki/amagaki-plugin-google-sheets');
 
 module.exports = function (pod) {
   googleSheetsPlugin.register(pod, {
     serviceAccountKeyFile: <pathToKeyFile>,
   });
 };
-```
-
-3. Use the YAML type in content files to fetch data.
-
-```yaml
-sheet: !GoogleSheet
-  spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c'
-  range: 'homepage'
-  cacheKey: 'homepage'
 ```

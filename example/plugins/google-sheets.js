@@ -1,3 +1,4 @@
+const googleAuthPlugin = require('./google-auth');
 const {google} = require('googleapis');
 const fsPath = require('path');
 const yaml = require('js-yaml');
@@ -5,8 +6,9 @@ const fs = require('fs');
 const {Builder} = require('@amagaki/amagaki/src/builder');
 
 const Transformation = {
-  ROWS: 'rows',
   GRID: 'grid',
+  OBJECT_ROWS: 'objectRows',
+  ROWS: 'rows',
   STRINGS: 'strings',
 };
 
@@ -116,6 +118,39 @@ function transformToGrid(pod, values) {
   return grid;
 }
 
+/**
+ * Converts a sheet formatted as a grid of strings into a list of objects
+ * mapping headers to values. The sheet must be in the following format:
+ *
+ * | header1  | header2 | header3 |
+ * | -------- | ------- | ------- |
+ * | foo      | a       | b       |
+ * | bar      | c       | d       |
+ *
+ * The values are transformed to:
+ *
+ * ```
+ * - header1: foo
+ *   header2: a
+ *   header3: b
+ * - header1: bar
+ *   header2: c
+ *   header3: d
+ * ```
+ */
+function transformToObjectRows(pod, values) {
+  const header = values.shift().slice(1);
+  const objectRows = [];
+  values.forEach(row => {
+    const objectRow = {};
+    row.forEach((value, i) => {
+      objectRow[header[i]] = value;
+    });
+    objectRows.push(objectRow);
+  });
+  return objectRows;
+}
+
 async function saveLocales(pod, keysToLocales) {
   const catalogsToMerge = {};
   for (const localesToStrings of Object.values(keysToLocales)) {
@@ -178,6 +213,8 @@ async function transform(pod, values, transformation) {
     return result.keysToStrings;
   } else if (transformation === Transformation.GRID) {
     return transformToGrid(pod, values);
+  } else if (transformation === Transformation.OBJECT_ROWS) {
+    return transformToObjectRows(pod, values);
   } else if (typeof tranformation === 'function') {
     return transformation(values);
   }
@@ -278,7 +315,10 @@ class GoogleSheetsPlugin {
   }
 }
 
-function register(pod, authPlugin) {
+function register(pod, authPluginOptions) {
+  const authPlugin =
+    pod.plugins.get('GoogleAuthPlugin') ||
+    googleAuthPlugin.register(pod, authPluginOptions);
   const sheetsPlugin = new GoogleSheetsPlugin(pod, authPlugin);
   const serverPlugin = pod.plugins.get('ServerPlugin');
   serverPlugin.register(app => {
