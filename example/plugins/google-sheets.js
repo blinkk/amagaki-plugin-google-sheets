@@ -13,6 +13,7 @@ const Transformation = {
 };
 
 const RowType = {
+  PREFER_STRING: 'preferString',
   STRING: 'string',
 };
 
@@ -20,10 +21,11 @@ const RowType = {
  * Converts a sheet formatted as a grid of strings into a mapping of keys to
  * localized strings. The sheet must be in the following format:
  *
- * | key  | type   | en    | de      | es    |
- * | ---- | ------ | ----- | ------- | ----- |
- * | foo  | string | Hello | Hallo   | Hola  |
- * | bar  | string | Bye   | Tschüss | Adiós |
+ * | key  | type         | en        | de      | es    |
+ * | ---- | ------------ | --------- | ------- | ----- |
+ * | foo  | string       | Hello     | Hallo   | Hola  |
+ * | bar  | string       | Bye       | Tschüss | Adiós |
+ * | bar  | preferString | Goodbye   |         |       |
  *
  * The values are transformed to:
  *
@@ -33,6 +35,7 @@ const RowType = {
  *     value: Hello
  * bar:
  *   !pod.string
+ *     prefer: Goodbye
  *     value: Bye
  * ```
  *
@@ -58,14 +61,17 @@ function transformToStrings(pod, values) {
     row.forEach((column, i) => {
       const locale = pod.locale(header[i]);
       const value = column;
-      keysToStrings[key] = pod.string(
-        {
-          value: value,
-        },
-        locale
-      );
-      keysToStrings[key] = value;
+      const stringOptions = {};
       if (rowType === RowType.STRING) {
+        stringOptions.value = value;
+      } else if (rowType === RowType.PREFER_STRING) {
+        stringOptions.prefer = value;
+      }
+      // TODO: Implement string serialization, and ensure stringOptions aren't
+      // overwritten.
+      // keysToStrings[key] = pod.string(stringOptions, locale);
+      keysToStrings[key] = value;
+      if ([RowType.STRING, RowType.PREFER_STRING].includes(rowType)) {
         localesToStrings[locale.id] = value;
       }
     });
