@@ -14,12 +14,12 @@ class GoogleAuthPlugin {
   constructor(pod, options) {
     this.pod = pod;
     // Used with service accounts (either keyFile or auto-configured).
-    this.auth = new google.auth.GoogleAuth({
+    this.authClient = new google.auth.GoogleAuth({
       scopes: ['https://www.googleapis.com/auth/spreadsheets'],
       keyFile: options.keyFile,
     });
     // Used with user accounts (via oauth2 flow).
-    this.oauth2 = new google.auth.OAuth2(
+    this.oauth2Client = new google.auth.OAuth2(
       options.clientId,
       options.clientSecret
     );

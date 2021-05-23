@@ -10,11 +10,44 @@ const Transformation = {
   STRINGS: 'strings',
 };
 
+const RowType = {
+  STRING: 'string',
+};
+
+/**
+ * Converts a sheet formatted as a grid of strings into a mapping of keys to
+ * localized strings. The sheet must be in the following format:
+ *
+ * | key  | type   | en    | de      | es    |
+ * | ---- | ------ | ----- | ------- | ----- |
+ * | foo  | string | Hello | Hallo   | Hola  |
+ * | bar  | string | Bye   | Tschüss | Adiós |
+ *
+ * The values are transformed to:
+ *
+ * foo:
+ *  !pod.string
+ *    value: Hello
+ * bar:
+ *  !pod.string
+ *    value: Bye
+ */
 function toStringFormat(pod, values) {
+  const keysToLocalesToStrings = {};
   const keysToStrings = {};
-  const header = values.shift().slice(1); // ['key', 'en', 'de', 'it', ...]
+  const rawHeader = values.shift();
+  // Header row must be in format:
+  // ['key', 'type', 'en', 'de', 'it', ...
+  if (rawHeader[0] !== 'key' || rawHeader[1] !== 'type') {
+    throw new Error(
+      `Found invalid header for string sheet: "${rawHeader[0]}", "${rawHeader[1]}". The first two header cells must be "key" and "type".`
+    );
+  }
+  const header = rawHeader.slice(2);
   values.forEach(row => {
+    const localesToStrings = {};
     const key = row.shift();
+    const rowType = row.shift();
     row.forEach((column, i) => {
       const locale = pod.locale(header[i]);
       const value = column;
@@ -24,9 +57,35 @@ function toStringFormat(pod, values) {
         },
         locale
       );
+      keysToStrings[key] = value;
+      if (rowType === RowType.STRING) {
+        localesToStrings[locale.id] = value;
+      }
     });
+    keysToLocalesToStrings[key] = localesToStrings;
   });
-  return keysToStrings;
+  return {
+    keysToStrings: keysToStrings,
+    keysToLocales: keysToLocalesToStrings,
+  };
+}
+
+function saveLocales(pod, keysToLocales) {
+  const catalogsToMerge = {};
+  Object.values(keysToLocales).forEach(localesToStrings => {
+    const baseString = localesToStrings[pod.defaultLocale.id];
+    // No source translation found, skip it.
+    if (!baseString) {
+      return;
+    }
+    for (const [locale, translatedString] of Object.entries(localesToStrings)) {
+      if (!catalogsToMerge[locale]) {
+        catalogsToMerge[locale] = {};
+      }
+      catalogsToMerge[locale][baseString] = translatedString;
+    }
+  });
+  console.log('catalogs to merge', catalogsToMerge);
 }
 
 function transform(pod, values, transformation) {
@@ -42,7 +101,11 @@ function transform(pod, values, transformation) {
     );
   }
   if (transformation === Transformation.STRINGS) {
-    return toStringFormat(pod, values);
+    const result = toStringFormat(pod, values);
+    saveLocales(pod, result.keysToLocales);
+    return result.keysToStrings;
+  } else if (typeof tranformation === 'function') {
+    return transformation(values);
   }
   return values;
 }
@@ -57,8 +120,12 @@ class GoogleSheetsPlugin {
   }
 
   getClient() {
-    const authClient = this.authPlugin.auth;
+    const authClient = this.authPlugin.authClient;
     return google.sheets({version: 'v4', auth: authClient});
+  }
+
+  fomatGoogleSheetsUrl(options) {
+    return `https://docs.google.com/spreadsheets/d/${options.spreadsheetId}/edit#range=${options.range}`;
   }
 
   async getValuesResponse(options) {
@@ -123,10 +190,6 @@ class GoogleSheetsPlugin {
       const values = transform(this.pod, valueRange.values, options.transform);
       this.saveFileInternal(podPath, values);
     });
-  }
-
-  fomatGoogleSheetsUrl(options) {
-    return `https://docs.google.com/spreadsheets/d/${options.spreadsheetId}/edit#range=${options.range}`;
   }
 }
 

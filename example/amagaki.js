@@ -14,6 +14,7 @@ module.exports = async function (pod, options) {
       podPath: '/content/partials/foo.yaml',
       spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c',
       range: 'homepage',
+      transform: 'strings',
     }),
     sheetsPlugin.bindCollection({
       collectionPath: '/content/foo',
