@@ -25,14 +25,19 @@ const RowType = {
  *
  * The values are transformed to:
  *
+ * ```
  * foo:
- *  !pod.string
- *    value: Hello
+ *   !pod.string
+ *     value: Hello
  * bar:
- *  !pod.string
- *    value: Bye
+ *   !pod.string
+ *     value: Bye
+ * ```
+ *
+ * Furthermore, any translation strings are automatically saved to the pod's
+ * locale files.
  */
-function toStringFormat(pod, values) {
+function transformToStrings(pod, values) {
   const keysToLocalesToStrings = {};
   const keysToStrings = {};
   const rawHeader = values.shift();
@@ -70,9 +75,50 @@ function toStringFormat(pod, values) {
   };
 }
 
-function saveLocales(pod, keysToLocales) {
+/**
+ * Converts a sheet formatted as a grid of strings into a mapping of keys to
+ * headers to values. The sheet must be in the following format:
+ *
+ * | <BLANK>  | header1 | header2 |
+ * | -------- | ------- | ------- |
+ * | foo      | a       | b       |
+ * | bar      | c       | d       |
+ *
+ * The values are transformed to:
+ *
+ * ```
+ * foo:
+ *   header1: a
+ *   header2: b
+ * bar:
+ *   header1: c
+ *   header2: d
+ * ```
+ */
+function transformToGrid(pod, values) {
+  const rawHeader = values.shift();
+  // Header row must be in format:
+  // ['key', 'type', 'en', 'de', 'it', ...
+  if (rawHeader[0] !== '') {
+    throw new Error(
+      `Found invalid header for grid sheet. The first cell must be blank, found: ${rawHeader[0]}.`
+    );
+  }
+  const header = rawHeader.slice(1);
+  const grid = {};
+  values.forEach(row => {
+    const key = row.shift();
+    grid[key] = {};
+    row.forEach((value, i) => {
+      grid[key][header[i]] = value;
+    });
+  });
+  return grid;
+}
+
+async function saveLocales(pod, keysToLocales) {
   const catalogsToMerge = {};
-  Object.values(keysToLocales).forEach(localesToStrings => {
+  for (const localesToStrings of Object.values(keysToLocales)) {
     const baseString = localesToStrings[pod.defaultLocale.id];
     // No source translation found, skip it.
     if (!baseString) {
@@ -84,11 +130,37 @@ function saveLocales(pod, keysToLocales) {
       }
       catalogsToMerge[locale][baseString] = translatedString;
     }
-  });
-  console.log('catalogs to merge', catalogsToMerge);
+  }
+  // TODO: Replace this code once the locale catalog format within Amagaki is
+  // stable, and there are built-in methods for updating catalogs and writing
+  // translations.
+  for (const [localeId, catalog] of Object.entries(catalogsToMerge)) {
+    const locale = pod.locale(localeId);
+    let contentToWrite;
+    if (!pod.fileExists(locale.podPath)) {
+      contentToWrite = yaml.dump(
+        {translations: catalog},
+        {
+          schema: pod.yamlSchema,
+        }
+      );
+    } else {
+      const existingContent = pod.readYaml(locale.podPath);
+      Object.assign(existingContent['translations'], catalog);
+      const content = yaml.dump(existingContent, {
+        schema: pod.yamlSchema,
+      });
+      contentToWrite = content;
+    }
+    await pod.builder.writeFileAsync(
+      pod.getAbsoluteFilePath(locale.podPath),
+      contentToWrite
+    );
+    console.log(`Saved -> ${locale.podPath}`);
+  }
 }
 
-function transform(pod, values, transformation) {
+async function transform(pod, values, transformation) {
   if (!transformation) {
     return values;
   }
@@ -101,9 +173,11 @@ function transform(pod, values, transformation) {
     );
   }
   if (transformation === Transformation.STRINGS) {
-    const result = toStringFormat(pod, values);
-    saveLocales(pod, result.keysToLocales);
+    const result = transformToStrings(pod, values);
+    await saveLocales(pod, result.keysToLocales);
     return result.keysToStrings;
+  } else if (transformation === Transformation.GRID) {
+    return transformToGrid(pod, values);
   } else if (typeof tranformation === 'function') {
     return transformation(values);
   }
@@ -164,17 +238,18 @@ class GoogleSheetsPlugin {
       spreadsheetId: options.spreadsheetId,
       range: options.range,
     });
-    const values = transform(this.pod, responseValues, options.transform);
+    const values = await transform(this.pod, responseValues, options.transform);
     this.saveFileInternal(podPath, values);
   }
 
   async bindCollection(options) {
     const realPath = this.pod.getAbsoluteFilePath(options.collectionPath);
-    // Actually "ensure directory exists for file".
+    // `ensureDirectoryExists` is actually `ensureDirectoryExistsForFile`.
     Builder.ensureDirectoryExists(fsPath.join(realPath, '_collection.yaml'));
     const existingFiles = fs.readdirSync(realPath).filter(path => {
       return !path.startsWith('_');
     });
+    const newFiles = [];
     const sheets = this.getClient();
     const valueRanges = (
       await sheets.spreadsheets.values.batchGet({
@@ -182,14 +257,24 @@ class GoogleSheetsPlugin {
         ranges: options.ranges,
       })
     ).data.valueRanges;
-    valueRanges.forEach(valueRange => {
-      const podPath = fsPath.join(
-        options.collectionPath,
-        `${valueRange.range.split('!')[0]}.yaml`
+    for (const valueRange of valueRanges) {
+      const basename = `${valueRange.range.split('!')[0]}.yaml`;
+      const podPath = fsPath.join(options.collectionPath, basename);
+      const values = await transform(
+        this.pod,
+        valueRange.values,
+        options.transform
       );
-      const values = transform(this.pod, valueRange.values, options.transform);
+      newFiles.push(basename);
       this.saveFileInternal(podPath, values);
-    });
+    }
+    const diff = existingFiles.filter(basename => !newFiles.includes(basename));
+    for (const basename of diff) {
+      const absPath = fsPath.join(realPath, basename);
+      const podPath = fsPath.join(options.collectionPath, basename);
+      fs.unlinkSync(absPath);
+      console.log(`Deleted -> ${podPath}`);
+    }
   }
 }
 
@@ -213,7 +298,7 @@ function register(pod, authPlugin) {
       return async () => {
         const resp = await sheetsPlugin.getValuesResponse(options);
         if (options.format === Transformation.STRINGS) {
-          return toStringFormat(pod, resp);
+          return transformToStrings(pod, resp);
         }
         return resp;
       };

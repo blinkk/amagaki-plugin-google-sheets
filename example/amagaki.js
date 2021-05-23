@@ -11,10 +11,16 @@ module.exports = async function (pod, options) {
   const sheetsPlugin = googleSheetsPlugin.register(pod);
   await Promise.all([
     sheetsPlugin.saveFile({
-      podPath: '/content/partials/foo.yaml',
+      podPath: '/content/partials/homepage.yaml',
       spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c',
       range: 'homepage',
       transform: 'strings',
+    }),
+    sheetsPlugin.saveFile({
+      podPath: '/content/partials/about.yaml',
+      spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c',
+      range: 'about',
+      transform: 'grid',
     }),
     sheetsPlugin.bindCollection({
       collectionPath: '/content/foo',
