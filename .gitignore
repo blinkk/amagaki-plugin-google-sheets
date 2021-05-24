@@ -1,3 +1,4 @@
-node_modules/
+dist/
 example/build
+node_modules/
 secrets.txt

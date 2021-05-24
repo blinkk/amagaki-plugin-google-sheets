@@ -1,4 +1,4 @@
-const googleSheetsPlugin = require('./plugins/google-sheets');
+const googleSheetsPlugin = require('../dist/google-sheets');
 
 module.exports = async function (pod) {
   const sheetsPlugin = googleSheetsPlugin.register(pod, {
