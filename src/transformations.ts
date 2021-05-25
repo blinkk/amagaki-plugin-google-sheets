@@ -15,6 +15,9 @@ export const Transformation = {
 };
 
 export type TransformationType = string | Function;
+export type KeysToStrings = Record<string, string>;
+export type KeysToLocalesToStrings = Record<string, KeysToStrings>;
+export type GridType = Record<string, Record<string, string>>;
 
 /**
  * Converts a sheet formatted as a grid of strings into a mapping of keys to
@@ -42,9 +45,12 @@ export type TransformationType = string | Function;
  * locale files.
  */
 export const toStrings = (pod: Pod, values: GoogleSheetsValuesReponse) => {
-  const keysToLocalesToStrings = {};
-  const keysToStrings = {};
+  const keysToLocalesToStrings: KeysToLocalesToStrings = {};
+  const keysToStrings: KeysToStrings = {};
   const rawHeader = values.shift();
+  if (!rawHeader) {
+    throw new Error('Unable to find header row, sheet is likely empty.');
+  }
   // Header row must be in format:
   // ['key', 'type', 'en', 'de', 'it', ...
   if (rawHeader[0] !== 'key' || rawHeader[1] !== 'type') {
@@ -54,8 +60,12 @@ export const toStrings = (pod: Pod, values: GoogleSheetsValuesReponse) => {
   }
   const header = rawHeader.slice(2);
   values.forEach(row => {
-    const localesToStrings = {};
+    const localesToStrings: Record<string, string> = {};
     const key = row.shift();
+    // Skip rows without keys.
+    if (!key) {
+      return;
+    }
     const rowType = row.shift();
     row.forEach((column, i) => {
       const locale = pod.locale(header[i]);
@@ -73,7 +83,10 @@ export const toStrings = (pod: Pod, values: GoogleSheetsValuesReponse) => {
       // overwritten.
       // keysToStrings[key] = pod.string(stringOptions, locale);
       keysToStrings[key] = value;
-      if ([RowType.STRING, RowType.PREFER_STRING].includes(rowType)) {
+      if (
+        rowType &&
+        [RowType.STRING, RowType.PREFER_STRING].includes(rowType)
+      ) {
         localesToStrings[locale.id] = value;
       }
     });
@@ -107,6 +120,9 @@ export const toStrings = (pod: Pod, values: GoogleSheetsValuesReponse) => {
  */
 export const toGrid = (pod: Pod, values: GoogleSheetsValuesReponse) => {
   const rawHeader = values.shift();
+  if (!rawHeader) {
+    throw new Error('Unable to find header row, sheet is likely empty.');
+  }
   // Header row must be in format:
   // ['key', 'type', 'en', 'de', 'it', ...
   if (rawHeader[0] !== '') {
@@ -115,9 +131,13 @@ export const toGrid = (pod: Pod, values: GoogleSheetsValuesReponse) => {
     );
   }
   const header = rawHeader.slice(1);
-  const grid = {};
+  const grid: GridType = {};
   values.forEach(row => {
     const key = row.shift();
+    // Skip empty rows.
+    if (!key) {
+      return;
+    }
     grid[key] = {};
     row.forEach((value, i) => {
       grid[key][header[i]] = value;
@@ -147,10 +167,14 @@ export const toGrid = (pod: Pod, values: GoogleSheetsValuesReponse) => {
  * ```
  */
 export const toObjectRows = (pod: Pod, values: GoogleSheetsValuesReponse) => {
-  const header = values.shift().slice(1);
-  const objectRows = [];
+  const header = values.shift();
+  if (!header) {
+    throw new Error('Unable to find header row, sheet is likely empty.');
+  }
+  type ObjectRow = Record<string, string>;
+  const objectRows: ObjectRow[] = [];
   values.forEach(row => {
-    const objectRow = {};
+    const objectRow: ObjectRow = {};
     row.forEach((value, i) => {
       objectRow[header[i]] = value;
     });

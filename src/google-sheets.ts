@@ -4,6 +4,7 @@ import * as v4 from 'googleapis/build/src/apis/sheets/v4';
 
 import {Builder} from '@amagaki/amagaki/src/builder';
 import {GoogleAuthPluginOptions} from './google-auth';
+import {KeysToLocalesToStrings} from './transformations';
 import {Pod} from '@amagaki/amagaki/src/pod';
 import fs from 'fs';
 import fsPath from 'path';
@@ -29,8 +30,10 @@ export type GoogleSheetsValuesReponse = string[][];
 /**
  * Updates the pod's locale files with translations retrieved from the sheet.
  */
-async function saveLocales(pod: Pod, keysToLocales) {
-  const catalogsToMerge = {};
+async function saveLocales(pod: Pod, keysToLocales: KeysToLocalesToStrings) {
+  type Catalog = Record<string, string>;
+  type LocalesToCatalogs = Record<string, Catalog>;
+  const catalogsToMerge: LocalesToCatalogs = {};
   for (const localesToStrings of Object.values(keysToLocales)) {
     const baseString = localesToStrings[pod.defaultLocale.id];
     // No source translation found, skip it.
@@ -166,6 +169,11 @@ class GoogleSheetsPlugin {
       spreadsheetId: options.spreadsheetId,
       range: options.range,
     });
+    if (!responseValues) {
+      throw new Error(
+        `Nothing found in sheet -> ${options.spreadsheetId} with range "${options.range}"`
+      );
+    }
     const values = await transform(this.pod, responseValues, options.transform);
     this.saveFileInternal(podPath, values);
   }
@@ -177,7 +185,7 @@ class GoogleSheetsPlugin {
     const existingFiles = fs.readdirSync(realPath).filter(path => {
       return !path.startsWith('_');
     });
-    const newFiles = [];
+    const newFiles: string[] = [];
     const sheets = this.getClient();
     const valueRanges = (
       await sheets.spreadsheets.values.batchGet({
@@ -185,7 +193,17 @@ class GoogleSheetsPlugin {
         ranges: options.ranges,
       })
     ).data.valueRanges;
+    if (!valueRanges) {
+      throw new Error(
+        `Nothing found from sheets for ${
+          options.spreadsheetId
+        } with ranges: ${options.ranges.join(', ')}`
+      );
+    }
     for (const valueRange of valueRanges) {
+      if (!valueRange.range || !valueRange.values) {
+        continue;
+      }
       // Range can be formatted like: `homepage!A1:Z999`
       const basename = `${valueRange.range.split('!')[0]}.yaml`;
       const podPath = fsPath.join(options.collectionPath, basename);
