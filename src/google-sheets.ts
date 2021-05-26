@@ -38,7 +38,7 @@ async function saveLocales(pod: Pod, keysToLocales: KeysToLocalesToStrings) {
     const baseString = localesToStrings[pod.defaultLocale.id];
     // No source translation found, skip it.
     if (!baseString) {
-      return;
+      continue;
     }
     for (const [locale, translatedString] of Object.entries(localesToStrings)) {
       if (!catalogsToMerge[locale]) {

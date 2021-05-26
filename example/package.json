@@ -1,9 +1,5 @@
 {
   "dependencies": {
-    "@amagaki/amagaki": "^0.4.0",
-    "google-auth-library": "^7.0.4",
-    "googleapis": "^73.0.0",
-    "js-yaml": "^4.1.0",
-    "typescript": "^4.2.4"
+    "@amagaki/amagaki": "^0.4.0"
   }
 }
