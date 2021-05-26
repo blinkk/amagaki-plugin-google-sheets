@@ -1,5 +1,9 @@
 # amagaki-plugin-google-sheets
 
+[![NPM Version][npm-image]][npm-url]
+[![GitHub Actions][github-image]][github-url]
+[![TypeScript Style Guide][gts-image]][gts-url]
+
 An Amagaki plugin for fetching content from Google Sheets. Capable of
 transforming Google Sheets into various formats, and supports using Google
 Sheets for managing translations.
@@ -217,3 +221,10 @@ The values are transformed to:
   - c
   - d
 ```
+
+[github-image]: https://github.com/blinkk/amagaki-plugin-google-sheets/workflows/Run%20tests/badge.svg
+[github-url]: https://github.com/blinkk/amagaki-plugin-google-sheets/actions
+[npm-image]: https://img.shields.io/npm/v/@amagaki/amagaki-plugin-google-sheets.svg
+[npm-url]: https://npmjs.org/package/@amagaki/amagaki-plugin-google-sheets
+[gts-image]: https://img.shields.io/badge/code%20style-google-blueviolet.svg
+[gts-url]: https://github.com/google/gts
