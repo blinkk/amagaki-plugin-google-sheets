@@ -28,4 +28,10 @@ module.exports = function (pod) {
     range: 'items',
     transform: 'objectRows',
   });
+  sheetsPlugin.saveFile({
+    podPath: '/content/transformations/rows.yaml',
+    spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c',
+    range: 'items',
+    transform: 'rows',
+  });
 };
