@@ -82,7 +82,9 @@ export const toStrings = (pod: Pod, values: GoogleSheetsValuesReponse) => {
       // TODO: Implement string serialization, and ensure stringOptions aren't
       // overwritten.
       // keysToStrings[key] = pod.string(stringOptions, locale);
-      keysToStrings[key] = value;
+      if (locale.id === pod.defaultLocale.id) {
+        keysToStrings[key] = value;
+      }
       if (
         rowType &&
         [RowType.STRING, RowType.PREFER_STRING].includes(rowType)
