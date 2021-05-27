@@ -1,6 +1,7 @@
 import * as googleAuthPlugin from './google-auth';
 import * as transformations from './transformations';
-import * as v4 from 'googleapis/build/src/apis/sheets/v4';
+
+import {google, sheets_v4} from 'googleapis';
 
 import {Builder} from '@amagaki/amagaki/src/builder';
 import {GoogleAuthPluginOptions} from './google-auth';
@@ -8,7 +9,6 @@ import {KeysToLocalesToStrings} from './transformations';
 import {Pod} from '@amagaki/amagaki/src/pod';
 import fs from 'fs';
 import fsPath from 'path';
-import {google} from 'googleapis';
 import yaml from 'js-yaml';
 
 export interface SaveFileOptions {
@@ -126,13 +126,13 @@ class GoogleSheetsPlugin {
   }
 
   fomatGoogleSheetsUrl(
-    params: v4.sheets_v4.Params$Resource$Spreadsheets$Values$Get
+    params: sheets_v4.Params$Resource$Spreadsheets$Values$Get
   ) {
     return `https://docs.google.com/spreadsheets/d/${params.spreadsheetId}/edit#range=${params.range}`;
   }
 
   async getValuesResponse(
-    params: v4.sheets_v4.Params$Resource$Spreadsheets$Values$Get
+    params: sheets_v4.Params$Resource$Spreadsheets$Values$Get
   ) {
     console.log(
       `Fetching Google Sheet -> ${this.fomatGoogleSheetsUrl(params)}`
