@@ -39,18 +39,19 @@ PROJECT=yourGcpProject \
 
 3. Ensure `key.json` is added to your `.gitignore`.
 
-4. Add to `amagaki.js`.
+4. Add to `amagaki.ts`.
 
-```js
-const googleSheetsPlugin = require('./plugins/google-sheets');
+```ts
+import * as googleSheetsPlugin from '@amagaki/amagaki-google-sheets-plugin';
+import {Pod, ServerPlugin} from '@amagaki/amagaki';
 
-module.exports = async function (pod) {
+export default (pod: Pod) => {
   const sheetsPlugin = googleSheetsPlugin.register(pod, {
     keyFile: 'key.json',
   });
 
   // Run Google Sheets plugin only when dev server starts.
-  const serverPlugin = pod.plugins.get('ServerPlugin');
+  const serverPlugin = pod.plugins.get('ServerPlugin') as ServerPlugin;
   serverPlugin.register(() => {
     // Saves a single file, "homepage" tab, `strings` transformation.
     sheetsPlugin.saveFile({
