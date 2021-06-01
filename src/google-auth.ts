@@ -1,6 +1,6 @@
+import {PluginComponent, Pod} from '@amagaki/amagaki';
+
 import {GoogleAuth} from 'google-auth-library';
-import {PluginComponent} from '@amagaki/amagaki/src/plugins';
-import {Pod} from '@amagaki/amagaki/src/pod';
 import {google} from 'googleapis';
 
 // TODO: Include scopes in options.

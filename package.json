@@ -46,7 +46,7 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
-    "@amagaki/amagaki": "^0.4.0",
+    "@amagaki/amagaki": "latest",
     "google-auth-library": "^7.1.0",
     "googleapis": "^67.1.0",
     "js-yaml": "^4.0.0"

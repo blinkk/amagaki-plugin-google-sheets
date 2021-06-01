@@ -1,12 +1,11 @@
 import * as googleAuthPlugin from './google-auth';
 import * as transformations from './transformations';
 
+import {Builder, Pod} from '@amagaki/amagaki';
 import {google, sheets_v4} from 'googleapis';
 
-import {Builder} from '@amagaki/amagaki/src/builder';
 import {GoogleAuthPluginOptions} from './google-auth';
 import {KeysToLocalesToStrings} from './transformations';
-import {Pod} from '@amagaki/amagaki/src/pod';
 import fs from 'fs';
 import fsPath from 'path';
 import yaml from 'js-yaml';
@@ -159,7 +158,7 @@ class GoogleSheetsPlugin {
       );
     }
     const realPath = this.pod.getAbsoluteFilePath(podPath);
-    this.pod.builder.writeFileAsync(realPath, rawContent);
+    await this.pod.builder.writeFileAsync(realPath, rawContent);
     console.log(`Saved -> ${podPath}`);
   }
 
@@ -175,7 +174,7 @@ class GoogleSheetsPlugin {
       );
     }
     const values = await transform(this.pod, responseValues, options.transform);
-    this.saveFileInternal(podPath, values);
+    await this.saveFileInternal(podPath, values);
   }
 
   async bindCollection(options: BindCollectionOptions) {
@@ -213,7 +212,7 @@ class GoogleSheetsPlugin {
         options.transform
       );
       newFiles.push(basename);
-      this.saveFileInternal(podPath, values);
+      await this.saveFileInternal(podPath, values);
     }
     const diff = existingFiles.filter(basename => !newFiles.includes(basename));
     for (const basename of diff) {

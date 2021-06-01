@@ -1,7 +1,7 @@
 import * as transformations from './transformations';
 
 import {ExecutionContext} from 'ava';
-import {Pod} from '@amagaki/amagaki/src/pod';
+import {Pod} from '@amagaki/amagaki';
 import test from 'ava';
 
 const valuesResponseAny = [

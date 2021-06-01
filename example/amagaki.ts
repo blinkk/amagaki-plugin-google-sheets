@@ -1,37 +1,40 @@
-const googleSheetsPlugin = require('../dist/google-sheets');
+// eslint-disable-next-line node/no-unpublished-import
+import * as googleSheetsPlugin from '../dist';
 
-module.exports = function (pod) {
-  const sheetsPlugin = googleSheetsPlugin.register(pod, {
+import {Pod} from '@amagaki/amagaki';
+
+export default (pod: Pod) => {
+  const sheets = googleSheetsPlugin.register(pod, {
     keyFile: '/Users/jeremydw/Downloads/madebygoog-52e1c116d139.json',
   });
-  sheetsPlugin.bindCollection({
+  sheets.bindCollection({
     collectionPath: '/content/strings',
     spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c',
     ranges: ['homepage', 'about'],
-    transform: 'strings',
+    transform: googleSheetsPlugin.Transformation.STRINGS,
   });
-  sheetsPlugin.saveFile({
+  sheets.saveFile({
     podPath: '/content/transformations/strings.yaml',
     spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c',
     range: 'homepage',
-    transform: 'strings',
+    transform: googleSheetsPlugin.Transformation.STRINGS,
   });
-  sheetsPlugin.saveFile({
+  sheets.saveFile({
     podPath: '/content/transformations/grid.yaml',
     spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c',
     range: 'items',
-    transform: 'grid',
+    transform: googleSheetsPlugin.Transformation.GRID,
   });
-  sheetsPlugin.saveFile({
+  sheets.saveFile({
     podPath: '/content/transformations/objectRows.yaml',
     spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c',
     range: 'items',
-    transform: 'objectRows',
+    transform: googleSheetsPlugin.Transformation.OBJECT_ROWS,
   });
-  sheetsPlugin.saveFile({
+  sheets.saveFile({
     podPath: '/content/transformations/rows.yaml',
     spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c',
     range: 'items',
-    transform: 'rows',
+    transform: googleSheetsPlugin.Transformation.ROWS,
   });
 };

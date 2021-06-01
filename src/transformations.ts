@@ -1,6 +1,6 @@
+import {Pod, StringOptions} from '@amagaki/amagaki';
+
 import {GoogleSheetsValuesReponse} from './google-sheets';
-import {Pod} from '@amagaki/amagaki/src/pod';
-import {StringOptions} from '@amagaki/amagaki/src/string';
 
 const RowType = {
   PREFER_STRING: 'preferString',

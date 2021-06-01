@@ -46,7 +46,7 @@ import * as googleSheetsPlugin from '@amagaki/amagaki-google-sheets-plugin';
 import {Pod, ServerPlugin} from '@amagaki/amagaki';
 
 export default (pod: Pod) => {
-  const sheetsPlugin = googleSheetsPlugin.register(pod, {
+  const sheets = googleSheetsPlugin.register(pod, {
     keyFile: 'key.json',
   });
 
@@ -54,7 +54,7 @@ export default (pod: Pod) => {
   const serverPlugin = pod.plugins.get('ServerPlugin') as ServerPlugin;
   serverPlugin.register(() => {
     // Saves a single file, "homepage" tab, `strings` transformation.
-    sheetsPlugin.saveFile({
+    sheets.saveFile({
       podPath: '/content/partials/homepage.yaml',
       spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c',
       range: 'homepage',
@@ -62,7 +62,7 @@ export default (pod: Pod) => {
     });
 
     // Save a single file, "about" tab, `grid` transformation.
-    sheetsPlugin.saveFile({
+    sheets.saveFile({
       podPath: '/content/partials/about.yaml',
       spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c',
       range: 'about',
@@ -70,7 +70,7 @@ export default (pod: Pod) => {
     });
 
     // Save a single file, "about" tab, `objectRows` transformation.
-    sheetsPlugin.saveFile({
+    sheets.saveFile({
       podPath: '/content/partials/aboutObjectRows.yaml',
       spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c',
       range: 'about',
@@ -82,7 +82,7 @@ export default (pod: Pod) => {
     // Because the `transform` value is set to `strings`, the plugin will also
     // import any translations contained within the sheets to their respective
     // locale files.
-    sheetsPlugin.bindCollection({
+    sheets.bindCollection({
       collectionPath: '/content/strings',
       spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c',
       ranges: ['homepage', 'about'],

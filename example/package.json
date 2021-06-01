@@ -1,5 +1,5 @@
 {
   "dependencies": {
-    "@amagaki/amagaki": "^0.4.0"
+    "@amagaki/amagaki": "latest"
   }
 }
