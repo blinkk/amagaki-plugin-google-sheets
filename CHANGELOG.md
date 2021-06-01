@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.0.2](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v1.0.1...v1.0.2) (2021-06-01)
+
+
+### Bug Fixes
+
+* fix package import path ([ee68ccd](https://www.github.com/blinkk/amagaki-plugin-google-sheets/commit/ee68ccd250a4a092cc55b47401e99f2e2c5dccb5))
+
 ### [1.0.1](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v1.0.0...v1.0.1) (2021-06-01)
 
 
