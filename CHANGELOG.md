@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.0.3](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v1.0.2...v1.0.3) (2021-06-08)
+
+
+### Bug Fixes
+
+* clean up transformed filenames ([8982edf](https://www.github.com/blinkk/amagaki-plugin-google-sheets/commit/8982edff8581b1d2ffa500ee3384d857e8034bdb))
+
 ### [1.0.2](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v1.0.1...v1.0.2) (2021-06-01)
 
 
