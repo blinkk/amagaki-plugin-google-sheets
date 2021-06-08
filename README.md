@@ -22,17 +22,21 @@ npm install --save @amagaki/amagaki-plugin-google-sheets
 
 2. Acquire a service account key file. You can do this interactively, from the
    IAM section of the Google Cloud Console, or you can do this via the `gcloud`
-   CLI (see below).
+   CLI (see below for an example).
 
 ```shell
-PROJECT=yourGcpProject \
-  gcloud --project=$PROJECT \
-    iam service-accounts create \
-    amagaki \
-  && gcloud --project=$PROJECT \
-    iam service-accounts keys create \
-    --iam-account amagaki@$PROJECT.iam.gserviceaccount.com \
-    key.json
+PROJECT=<Google Cloud Project ID>
+
+# Create a service account named `amagaki`.
+gcloud --project=$PROJECT \
+  iam service-accounts create \
+  amagaki
+
+# Create a JSON key and download it to `key.json`.
+gcloud --project=$PROJECT \
+  iam service-accounts keys create \
+  --iam-account amagaki@$PROJECT.iam.gserviceaccount.com \
+  key.json
 ```
 
 2. Ensure the sheet is shared with the service account.
@@ -41,53 +45,55 @@ PROJECT=yourGcpProject \
 
 4. Add to `amagaki.ts`.
 
-```ts
+```typescript
 import * as googleSheetsPlugin from '@amagaki/amagaki-google-sheets-plugin';
 import {Pod, ServerPlugin} from '@amagaki/amagaki';
 
 export default (pod: Pod) => {
-  const sheets = googleSheetsPlugin.register(pod, {
-    keyFile: 'key.json',
-  });
-
-  // Run Google Sheets plugin only when dev server starts.
+  // Run Google Sheets plugin when dev server starts.
   const serverPlugin = pod.plugins.get('ServerPlugin') as ServerPlugin;
-  serverPlugin.register(() => {
-    // Saves a single file, "homepage" tab, `strings` transformation.
-    sheets.saveFile({
-      podPath: '/content/partials/homepage.yaml',
-      spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c',
-      range: 'homepage',
-      transform: 'strings',
+  serverPlugin.register(async () => {
+    const sheets = googleSheetsPlugin.register(pod, {
+      keyFile: 'key.json',
     });
+    
+    await Promise.all([
+      // Binds a collection to specified tabs within the Google Sheet. Deletes
+      // files from the collection that no longer exist in the sheet.
+      // Because the `transform` value is set to `strings`, the plugin will also
+      // import any translations contained within the sheets to their respective
+      // locale files.
+      sheets.bindCollection({
+        collectionPath: '/content/strings',
+        spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c',
+        ranges: ['homepage', 'about'],
+        transform: 'strings',
+      }),
 
-    // Save a single file, "about" tab, `grid` transformation.
-    sheets.saveFile({
-      podPath: '/content/partials/about.yaml',
-      spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c',
-      range: 'about',
-      transform: 'grid',
-    });
+      // Saves a single file, "homepage" tab, `strings` transformation.
+      sheets.saveFile({
+        podPath: '/content/partials/homepage.yaml',
+        spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c',
+        range: 'homepage',
+        transform: 'strings',
+      }),
 
-    // Save a single file, "about" tab, `objectRows` transformation.
-    sheets.saveFile({
-      podPath: '/content/partials/aboutObjectRows.yaml',
-      spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c',
-      range: 'about',
-      transform: 'objectRows',
-    });
+      // Save a single file, "about" tab, `grid` transformation.
+      sheets.saveFile({
+        podPath: '/content/partials/about.yaml',
+        spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c',
+        range: 'about',
+        transform: 'grid',
+      }),
 
-    // Binds a collection to specified tabs within the Google Sheet. Deletes
-    // files from the collection that no longer exist in the sheet.
-    // Because the `transform` value is set to `strings`, the plugin will also
-    // import any translations contained within the sheets to their respective
-    // locale files.
-    sheets.bindCollection({
-      collectionPath: '/content/strings',
-      spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c',
-      ranges: ['homepage', 'about'],
-      transform: 'strings',
-    });
+      // Save a single file, "about" tab, `objectRows` transformation.
+      sheets.saveFile({
+        podPath: '/content/partials/aboutObjectRows.yaml',
+        spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c',
+        range: 'about',
+        transform: 'objectRows',
+      }),
+    ]);
   });
 };
 
