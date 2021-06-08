@@ -204,7 +204,10 @@ class GoogleSheetsPlugin {
         continue;
       }
       // Range can be formatted like: `homepage!A1:Z999`
-      const basename = `${valueRange.range.split('!')[0]}.yaml`;
+      const basename = `${valueRange.range
+        .split('!')[0]
+        .replace(/'/gi, '')
+        .replace(/ /gi, '-')}.yaml`;
       const podPath = fsPath.join(options.collectionPath, basename);
       const values = await transform(
         this.pod,

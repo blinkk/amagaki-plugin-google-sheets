@@ -46,7 +46,7 @@ gcloud --project=$PROJECT \
 4. Add to `amagaki.ts`.
 
 ```typescript
-import * as googleSheetsPlugin from '@amagaki/amagaki-google-sheets-plugin';
+import * as googleSheetsPlugin from '@amagaki/amagaki-plugin-google-sheets';
 import {Pod, ServerPlugin} from '@amagaki/amagaki';
 
 export default (pod: Pod) => {
@@ -101,9 +101,14 @@ export default (pod: Pod) => {
 
 ## Transform options
 
+- [strings](#strings)
+- [grid](#grid)
+- [objectRows](#objectrows)
+- [rows (default)](#rows-default)
+
 ### strings
 
-NOTE: The `preferString` and `!IfLocale` features of this plugin are currently
+⚠️ NOTE: The `preferString` and `!IfLocale` features of this plugin are currently
 unimplemented.
 
 Use the `strings` format when managing website copy (and optionally translation
