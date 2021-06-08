@@ -1,3 +1,5 @@
+import express = require('express');
+
 import {PluginComponent, Pod} from '@amagaki/amagaki';
 
 import {GoogleAuth} from 'google-auth-library';
@@ -25,6 +27,11 @@ export class GoogleAuthPlugin implements PluginComponent {
       scopes: SCOPES,
       keyFile: options.keyFile,
     });
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async createServerHook(app: express.Express) {
+    // TODO: Support user authentication flows.
   }
 }
 
