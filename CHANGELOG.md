@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v1.0.3...v1.1.0) (2021-06-09)
+
+
+### Features
+
+* add empty strings to yaml when cells are empty ([4197a47](https://www.github.com/blinkk/amagaki-plugin-google-sheets/commit/4197a47be80e30c3541b3cb567c9057ec707d4c0))
+
 ### [1.0.3](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v1.0.2...v1.0.3) (2021-06-08)
 
 
