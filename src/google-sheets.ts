@@ -139,8 +139,8 @@ class GoogleSheetsPlugin {
     const sheets = this.getClient();
     const resp = (
       await sheets.spreadsheets.values.get({
-        spreadsheetId: params.spreadsheetId,
         range: params.range,
+        spreadsheetId: params.spreadsheetId,
       })
     ).data.values;
     return resp;

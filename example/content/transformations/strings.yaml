@@ -1,5 +1,6 @@
 heroHeadline: Hello World
 heroBody: My name is Jamie
-heroFooter: This is really interesting
-featureHeadline: Test Test Test
+heroFooter: I tripped over the cat.
+featureHeadline: He fell off the ladder.
 featureBody: https://example.com
+emptyStringTest: ''

@@ -16,6 +16,13 @@ const valuesResponseGrid = [
   ['bar', 'c', 'd'],
 ];
 
+const valuesResponseStrings = [
+  ['key', 'type', 'en', 'de'],
+  ['title', 'string', 'Hello', 'Hallo'],
+  ['body', 'string', '', ''],
+  ['url', '', 'https://example.com'],
+];
+
 test('Test toObjectRows', async (t: ExecutionContext) => {
   const pod = new Pod('../example');
   t.deepEqual(transformations.toObjectRows(pod, valuesResponseAny), [
@@ -34,6 +41,28 @@ test('Test toGrid', async (t: ExecutionContext) => {
     bar: {
       header2: 'c',
       header3: 'd',
+    },
+  });
+});
+
+test('Test toStrings', async (t: ExecutionContext) => {
+  const pod = new Pod('../example');
+  t.deepEqual(transformations.toStrings(pod, valuesResponseStrings), {
+    keysToStrings: {
+      title: 'Hello',
+      body: '',
+      url: 'https://example.com',
+    },
+    keysToLocales: {
+      title: {
+        en: 'Hello',
+        de: 'Hallo',
+      },
+      body: {
+        en: '',
+        de: '',
+      },
+      url: {},
     },
   });
 });
