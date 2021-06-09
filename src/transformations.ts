@@ -67,6 +67,12 @@ export const toStrings = (pod: Pod, values: GoogleSheetsValuesReponse) => {
       return;
     }
     const rowType = row.shift();
+    // Fill the array with empty strings to ensure all keys are added to YAML
+    // files.
+    const blankColumns = header.length - row.length;
+    if (blankColumns) {
+      row = [...row, ...Array(blankColumns).fill('')];
+    }
     row.forEach((column, i) => {
       const locale = pod.locale(header[i]);
       const value = column;
