@@ -74,7 +74,17 @@ export const toStrings = (pod: Pod, values: GoogleSheetsValuesReponse) => {
       row = [...row, ...Array(blankColumns).fill('')];
     }
     row.forEach((column, i) => {
-      const locale = pod.locale(header[i]);
+      const localeId = header[i];
+      // Skip column headers that are unlikely to be locales.
+      if (
+        localeId.includes(' ') ||
+        localeId.startsWith('*') ||
+        localeId.startsWith('_') ||
+        localeId.length > 10 // Unlikely any locale IDs are longer than 10.
+      ) {
+        return;
+      }
+      const locale = pod.locale(localeId);
       const value = column;
       // TODO: Fix merging stringOptions across rows.
       const stringOptions: StringOptions = {
