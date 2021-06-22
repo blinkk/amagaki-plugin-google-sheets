@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v1.1.0...v1.2.0) (2021-06-22)
+
+
+### Features
+
+* skip columns unlikely to be locales ([1307e6f](https://www.github.com/blinkk/amagaki-plugin-google-sheets/commit/1307e6f373c6ed4dde41579625bac7f7bc03a5f7))
+
 ## [1.1.0](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v1.0.3...v1.1.0) (2021-06-09)
 
 
