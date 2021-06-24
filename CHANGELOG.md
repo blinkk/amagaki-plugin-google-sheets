@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v1.2.0...v2.0.0) (2021-06-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* serialize to pod.string and IfLocale types (#8)
+
+### Features
+
+* serialize to pod.string and IfLocale types ([#8](https://www.github.com/blinkk/amagaki-plugin-google-sheets/issues/8)) ([a1e880a](https://www.github.com/blinkk/amagaki-plugin-google-sheets/commit/a1e880a45b3c49ef719e9c2ea23ec93842760963))
+
 ## [1.2.0](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v1.1.0...v1.2.0) (2021-06-22)
 
 
