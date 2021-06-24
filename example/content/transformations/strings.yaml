@@ -1,6 +1,5 @@
-heroHeadline: Hello World
-heroBody: My name is Jamie
-heroFooter: I tripped over the cat.
-featureHeadline: He fell off the ladder.
-featureBody: https://example.com
-emptyStringTest: ''
+heroHeadline: !pod.string Hello World
+heroBody: !pod.string My name is Jamie
+heroFooter: !pod.string I tripped over the cat.
+featureHeadline: !pod.string He fell off the ladder.
+emptyStringTest: !pod.string ''

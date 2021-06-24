@@ -1,7 +1,8 @@
 import * as transformations from './transformations';
 
+import {LocalizableData, Pod} from '@amagaki/amagaki';
+
 import {ExecutionContext} from 'ava';
-import {Pod} from '@amagaki/amagaki';
 import test from 'ava';
 
 const valuesResponseAny = [
@@ -19,7 +20,9 @@ const valuesResponseGrid = [
 const valuesResponseStrings = [
   ['key', 'type', 'en', 'de'],
   ['title', 'string', 'Hello', 'Hallo'],
+  ['title', 'preferString', 'Preferred Hello', ''],
   ['body', 'string', '', ''],
+  ['image', '', 'image1.jpg', 'image2.jpg'],
   ['url', '', 'https://example.com'],
 ];
 
@@ -48,21 +51,33 @@ test('Test toGrid', async (t: ExecutionContext) => {
 test('Test toStrings', async (t: ExecutionContext) => {
   const pod = new Pod('../example');
   t.deepEqual(transformations.toStrings(pod, valuesResponseStrings), {
-    keysToStrings: {
-      title: 'Hello',
-      body: '',
-      url: 'https://example.com',
+    keysToFields: {
+      title: pod.string({
+        prefer: 'Preferred Hello',
+        value: 'Hello',
+      }),
+      body: pod.string({value: ''}),
+      image: new LocalizableData(pod, {
+        default: 'image1.jpg',
+        de: 'image2.jpg',
+      }),
+      url: new LocalizableData(pod, {default: 'https://example.com'}),
     },
     keysToLocales: {
-      title: {
+      'title:0': {
         en: 'Hello',
         de: 'Hallo',
       },
-      body: {
+      'title:1': {
+        en: 'Preferred Hello',
+        de: '',
+      },
+      'body:2': {
         en: '',
         de: '',
       },
-      url: {},
+      'image:3': {},
+      'url:4': {},
     },
   });
 });
