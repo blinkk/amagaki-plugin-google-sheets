@@ -1,6 +1,13 @@
-heroHeadline: Hello World
-heroBody: My name is Jamie
-heroFooter: I tripped over the cat.
-featureHeadline: He fell off the ladder.
-featureBody: https://example.com
-emptyStringTest: ''
+heroHeadline: !pod.string &ref_7
+  prefer: Hello Preferred World
+  value: Hello World
+heroBody: !pod.string My name is Jamie
+heroFooter: !pod.string I tripped over the cat.
+featureHeadline: !pod.string He fell off the ladder.
+emptyStringTest: !pod.string ''
+dataTypeTest: !IfLocale 
+  default: image.jpg
+dataType2Test: !IfLocale 
+  default: image2.jpg
+  de: image2de.jpg
+  it: image2it.jpg

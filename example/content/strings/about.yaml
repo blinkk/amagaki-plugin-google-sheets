@@ -1,5 +1,6 @@
-heroHeadline: He sat under a tree.
-heroBody: There is someone at the door.
-heroFooter: The crocodiles snapped at the boat.
-featureHeadline: Put the books on the table.
-featureBody: There are many apples on the tree.
+heroHeadline: !pod.string &ref_7
+  prefer: He sat under a tree.
+  value: He is in his office.
+heroBody: !pod.string There is someone at the door.
+heroFooter: !pod.string The crocodiles snapped at the boat.
+featureHeadline: !pod.string Put the books on the table.

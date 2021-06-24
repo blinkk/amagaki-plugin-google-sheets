@@ -1,10 +1,11 @@
-import {Pod, StringOptions} from '@amagaki/amagaki';
+import {LocalizableData, Pod, TranslationString} from '@amagaki/amagaki';
 
 import {GoogleSheetsValuesReponse} from './google-sheets';
 
 const RowType = {
   PREFER_STRING: 'preferString',
   STRING: 'string',
+  DATA: '',
 };
 
 export const Transformation = {
@@ -15,8 +16,10 @@ export const Transformation = {
 };
 
 export type TransformationType = string | Function;
-export type KeysToStrings = Record<string, string>;
-export type KeysToLocalesToStrings = Record<string, KeysToStrings>;
+export type Dumpable = LocalizableData | TranslationString | string;
+export type keysToFields = Record<string, Dumpable>;
+export type keysToStrings = Record<string, string>;
+export type KeysToLocalesToStrings = Record<string, keysToStrings>;
 export type GridType = Record<string, Record<string, string>>;
 
 /**
@@ -28,6 +31,7 @@ export type GridType = Record<string, Record<string, string>>;
  * | foo  | string       | Hello     | Hallo   | Hola  |
  * | bar  | string       | Bye       | Tschüss | Adiós |
  * | bar  | preferString | Goodbye   |         |       |
+ * | baz  |              | base.jpg  | de.jpg  |       |
  *
  * The values are transformed to:
  *
@@ -39,6 +43,9 @@ export type GridType = Record<string, Record<string, string>>;
  *   !pod.string
  *     prefer: Goodbye
  *     value: Bye
+ * baz: !IfLocale
+ *   default: base.jpg
+ *   de: de.jpg
  * ```
  *
  * Furthermore, any translation strings are automatically saved to the pod's
@@ -46,7 +53,7 @@ export type GridType = Record<string, Record<string, string>>;
  */
 export const toStrings = (pod: Pod, values: GoogleSheetsValuesReponse) => {
   const keysToLocalesToStrings: KeysToLocalesToStrings = {};
-  const keysToStrings: KeysToStrings = {};
+  const keysToFields: keysToFields = {};
   const rawHeader = values.shift();
   if (!rawHeader) {
     throw new Error('Unable to find header row, sheet is likely empty.');
@@ -59,9 +66,9 @@ export const toStrings = (pod: Pod, values: GoogleSheetsValuesReponse) => {
     );
   }
   const header = rawHeader.slice(2);
-  values.forEach(row => {
-    const localesToStrings: Record<string, string> = {};
-    const key = row.shift();
+  values.forEach((row, n) => {
+    const localesToStrings: Record<string, any> = {};
+    const key = row.shift() as string;
     // Skip rows without keys.
     if (!key) {
       return;
@@ -86,20 +93,42 @@ export const toStrings = (pod: Pod, values: GoogleSheetsValuesReponse) => {
       }
       const locale = pod.locale(localeId);
       const value = column;
-      // TODO: Fix merging stringOptions across rows.
-      const stringOptions: StringOptions = {
-        value: '',
-      };
-      if (rowType === RowType.STRING) {
-        stringOptions.value = value;
-      } else if (rowType === RowType.PREFER_STRING) {
-        stringOptions.prefer = value;
+
+      let existingField = keysToFields[key] as Dumpable;
+      const isDefaultLocale = locale.id === pod.defaultLocale.id;
+      if (existingField) {
+        // Combine two rows with the same key into one `TranslationString`
+        // object, setting the `value` and `prefer` values individually.
+        if (isDefaultLocale && rowType === RowType.STRING) {
+          (existingField as TranslationString).value = value;
+        } else if (isDefaultLocale && rowType === RowType.PREFER_STRING) {
+          (existingField as TranslationString).prefer = value;
+        } else if (rowType === RowType.DATA) {
+          const localizableDataKey = isDefaultLocale ? 'default' : locale.id;
+          // Avoid adding empty keys.
+          if (value) {
+            (existingField as LocalizableData).data[localizableDataKey] = value;
+          }
+        }
+      } else {
+        if (rowType === RowType.STRING) {
+          existingField = pod.string({value: value});
+        } else if (rowType === RowType.PREFER_STRING) {
+          existingField = pod.string({prefer: value, value: value});
+        } else if (rowType === RowType.DATA) {
+          const data: Record<string, string> = {};
+          const localizableDataKey = isDefaultLocale ? 'default' : locale.id;
+          // Avoid adding empty keys.
+          if (value) {
+            data[localizableDataKey] = value;
+          }
+          const localizableData = new LocalizableData(pod, data);
+          existingField = localizableData;
+        }
       }
-      // TODO: Implement string serialization, and ensure stringOptions aren't
-      // overwritten.
-      // keysToStrings[key] = pod.string(stringOptions, locale);
-      if (locale.id === pod.defaultLocale.id) {
-        keysToStrings[key] = value;
+
+      if (isDefaultLocale) {
+        keysToFields[key] = existingField;
       }
       if (
         rowType &&
@@ -108,10 +137,10 @@ export const toStrings = (pod: Pod, values: GoogleSheetsValuesReponse) => {
         localesToStrings[locale.id] = value;
       }
     });
-    keysToLocalesToStrings[key] = localesToStrings;
+    keysToLocalesToStrings[`${key}:${n}`] = localesToStrings;
   });
   return {
-    keysToStrings: keysToStrings,
+    keysToFields: keysToFields,
     keysToLocales: keysToLocalesToStrings,
   };
 };

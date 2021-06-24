@@ -53,18 +53,11 @@ async function saveLocales(pod: Pod, keysToLocales: KeysToLocalesToStrings) {
     const locale = pod.locale(localeId);
     let contentToWrite;
     if (!pod.fileExists(locale.podPath)) {
-      contentToWrite = yaml.dump(
-        {translations: catalog},
-        {
-          schema: pod.yamlSchema,
-        }
-      );
+      contentToWrite = pod.dumpYaml({translations: catalog});
     } else {
-      const existingContent = pod.readYaml(locale.podPath);
-      Object.assign(existingContent['translations'], catalog);
-      const content = yaml.dump(existingContent, {
-        schema: pod.yamlSchema,
-      });
+      const existingContent = pod.readYaml(locale.podPath) || {};
+      Object.assign(existingContent['translations'] || {}, catalog);
+      const content = pod.dumpYaml(existingContent);
       contentToWrite = content;
     }
     await pod.builder.writeFileAsync(
@@ -92,7 +85,7 @@ async function transform(
   if (transformation === transformations.Transformation.STRINGS) {
     const result = transformations.toStrings(pod, values);
     await saveLocales(pod, result.keysToLocales);
-    return result.keysToStrings;
+    return result.keysToFields;
   } else if (transformation === transformations.Transformation.GRID) {
     return transformations.toGrid(pod, values);
   } else if (transformation === transformations.Transformation.OBJECT_ROWS) {
@@ -151,7 +144,7 @@ class GoogleSheetsPlugin {
     if (podPath.endsWith('.json')) {
       rawContent = JSON.stringify(content);
     } else if (podPath.endsWith('.yaml')) {
-      rawContent = yaml.dump(content);
+      rawContent = this.pod.dumpYaml(content);
     } else {
       throw new Error(
         `Cannot save file due to unsupported extenson -> ${podPath}`
