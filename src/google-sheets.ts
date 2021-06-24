@@ -53,7 +53,6 @@ async function saveLocales(pod: Pod, keysToLocales: KeysToLocalesToStrings) {
     const locale = pod.locale(localeId);
     let contentToWrite;
     if (!pod.fileExists(locale.podPath)) {
-      console.log(catalog);
       contentToWrite = pod.dumpYaml({translations: catalog});
     } else {
       const existingContent = pod.readYaml(locale.podPath) || {};

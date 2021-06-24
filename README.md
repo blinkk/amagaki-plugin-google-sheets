@@ -108,15 +108,13 @@ export default (pod: Pod) => {
 
 ### strings
 
-⚠️ NOTE: The `preferString` and `!IfLocale` features of this plugin are currently
-unimplemented.
-
 Use the `strings` format when managing website copy (and optionally translation
 strings) inside a Google Sheet. Non-translation data can also be added, by
 leaving the `type` field blank.
 
 Converts a sheet formatted as a grid of strings into a mapping of keys to
-localized strings. The sheet must be in the following format:
+localized strings. Additional non-string types can be added to manage localized
+data. The sheet must be in the following format:
 
 ```markdown
 | key  | type         | en        | de      | es    |
@@ -130,24 +128,19 @@ localized strings. The sheet must be in the following format:
 The values are transformed to:
 
 ```yaml
-foo:
-  !pod.string
-    value: Hello
-bar:
-  !pod.string
-    prefer: Goodbye
-    value: Bye
-baz:
-  !IfLocale
-    default: https://example.com
-    de: https://example.de
-    es: https://example.es
+foo: !pod.string Hello
+bar: !pod.string
+  prefer: Goodbye
+  value: Bye
+baz: !IfLocale
+  default: https://example.com
+  de: https://example.de
+  es: https://example.es
 ```
 
 Furthermore, any translation strings denoted by type "string" within the sheet
 are automatically saved to the pod's locale files. Any rows that do not have
 type "string" are not imported to the locale files.
-
 
 To refer to your Google Sheets data from documents, use the `!pod.yaml` YAML
 type. The content can be accessed in a template regularly. `!pod.string` types
