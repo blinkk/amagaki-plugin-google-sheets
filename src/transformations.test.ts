@@ -51,12 +51,6 @@ test('Test toGrid', async (t: ExecutionContext) => {
 
 test('Test toStrings', async (t: ExecutionContext) => {
   const pod = new Pod('../example');
-  console.log(
-    new LocalizableData(pod, {
-      en: 'a',
-      de: '',
-    }).localize(new Locale(pod, 'ja'))
-  );
   t.deepEqual(transformations.toStrings(pod, valuesResponseStrings), {
     keysToFields: {
       title: pod.string({
