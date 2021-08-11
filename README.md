@@ -110,7 +110,9 @@ export default (pod: Pod) => {
 
 Use the `strings` format when managing website copy (and optionally translation
 strings) inside a Google Sheet. Non-translation data can also be added, by
-leaving the `type` field blank.
+leaving the `type` field blank.  For data that shouldn't fallback to the default
+`en` locale, use `explicit` in the `type` field.
+
 
 Converts a sheet formatted as a grid of strings into a mapping of keys to
 localized strings. Additional non-string types can be added to manage localized
