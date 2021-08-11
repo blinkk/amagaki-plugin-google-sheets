@@ -56,7 +56,7 @@ export default (pod: Pod) => {
     const sheets = googleSheetsPlugin.register(pod, {
       keyFile: 'key.json',
     });
-    
+
     await Promise.all([
       // Binds a collection to specified tabs within the Google Sheet. Deletes
       // files from the collection that no longer exist in the sheet.
@@ -122,7 +122,8 @@ data. The sheet must be in the following format:
 | foo  | string       | Hello     | Hallo   | Hola  |
 | bar  | string       | Bye       | Tschüss | Adiós |
 | bar  | preferString | Goodbye   |         |       |
-| baz  | | https://example.com | https://example.de | https://example.es |
+| baz  |              | https://example.com | https://example.de | https://example.es |
+| qux  | explicit     | a         | b       |       |
 ```
 
 The values are transformed to:
@@ -136,6 +137,9 @@ baz: !IfLocale
   default: https://example.com
   de: https://example.de
   es: https://example.es
+qux: !IfLocale
+  en: a
+  de: b
 ```
 
 Furthermore, any translation strings denoted by type "string" within the sheet
