@@ -1,6 +1,6 @@
 import * as transformations from './transformations';
 
-import {LocalizableData, Pod} from '@amagaki/amagaki';
+import {Locale, LocalizableData, Pod} from '@amagaki/amagaki';
 
 import {ExecutionContext} from 'ava';
 import test from 'ava';
@@ -18,12 +18,13 @@ const valuesResponseGrid = [
 ];
 
 const valuesResponseStrings = [
-  ['key', 'type', 'en', 'de'],
-  ['title', 'string', 'Hello', 'Hallo'],
-  ['title', 'preferString', 'Preferred Hello', ''],
-  ['body', 'string', '', ''],
-  ['image', '', 'image1.jpg', 'image2.jpg'],
+  ['key', 'type', 'en', 'de', 'ja'],
+  ['title', 'string', 'Hello', 'Hallo', 'こんにちは'],
+  ['title', 'preferString', 'Preferred Hello', '', 'こんにちは'],
+  ['body', 'string', '', '', ''],
+  ['image', '', 'image1.jpg', 'image2.jpg', ''],
   ['url', '', 'https://example.com'],
+  ['survey_key', 'explicit', 'a', 'b', ''],
 ];
 
 test('Test toObjectRows', async (t: ExecutionContext) => {
@@ -62,22 +63,44 @@ test('Test toStrings', async (t: ExecutionContext) => {
         de: 'image2.jpg',
       }),
       url: new LocalizableData(pod, {default: 'https://example.com'}),
+      survey_key: new LocalizableData(pod, {
+        en: 'a',
+        de: 'b',
+      }),
     },
     keysToLocales: {
       'title:0': {
         en: 'Hello',
         de: 'Hallo',
+        ja: 'こんにちは',
       },
       'title:1': {
         en: 'Preferred Hello',
         de: '',
+        ja: 'こんにちは',
       },
       'body:2': {
         en: '',
         de: '',
+        ja: '',
       },
       'image:3': {},
       'url:4': {},
+      'survey_key:5': {},
     },
   });
+});
+
+test('Test explicit data type', async (t: ExecutionContext) => {
+  const pod = new Pod('../example');
+  const transformObject = transformations.toStrings(pod, [
+    ['key', 'type', 'en', 'de', 'ja'],
+    ['survey_key', 'explicit', 'a', 'b', ''],
+  ]);
+
+  const surveyLocalizableData = transformObject.keysToFields
+    .survey_key as LocalizableData;
+  t.assert(surveyLocalizableData.localize(new Locale(pod, 'en')), 'a');
+  t.assert(surveyLocalizableData.localize(new Locale(pod, 'de')), 'b');
+  t.falsy(surveyLocalizableData.localize(new Locale(pod, 'ja')));
 });

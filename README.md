@@ -56,7 +56,7 @@ export default (pod: Pod) => {
     const sheets = googleSheetsPlugin.register(pod, {
       keyFile: 'key.json',
     });
-    
+
     await Promise.all([
       // Binds a collection to specified tabs within the Google Sheet. Deletes
       // files from the collection that no longer exist in the sheet.
@@ -110,7 +110,9 @@ export default (pod: Pod) => {
 
 Use the `strings` format when managing website copy (and optionally translation
 strings) inside a Google Sheet. Non-translation data can also be added, by
-leaving the `type` field blank.
+leaving the `type` field blank.  For data that shouldn't fallback to the default
+`en` locale, use `explicit` in the `type` field.
+
 
 Converts a sheet formatted as a grid of strings into a mapping of keys to
 localized strings. Additional non-string types can be added to manage localized
@@ -122,7 +124,8 @@ data. The sheet must be in the following format:
 | foo  | string       | Hello     | Hallo   | Hola  |
 | bar  | string       | Bye       | Tschüss | Adiós |
 | bar  | preferString | Goodbye   |         |       |
-| baz  | | https://example.com | https://example.de | https://example.es |
+| baz  |              | https://example.com | https://example.de | https://example.es |
+| qux  | explicit     | a         | b       |       |
 ```
 
 The values are transformed to:
@@ -136,6 +139,9 @@ baz: !IfLocale
   default: https://example.com
   de: https://example.de
   es: https://example.es
+qux: !IfLocale
+  en: a
+  de: b
 ```
 
 Furthermore, any translation strings denoted by type "string" within the sheet
