@@ -18,12 +18,13 @@ const valuesResponseGrid = [
 ];
 
 const valuesResponseStrings = [
-  ['key', 'type', 'en', 'de'],
-  ['title', 'string', 'Hello', 'Hallo'],
-  ['title', 'preferString', 'Preferred Hello', ''],
-  ['body', 'string', '', ''],
-  ['image', '', 'image1.jpg', 'image2.jpg'],
+  ['key', 'type', 'en', 'de', 'ja'],
+  ['title', 'string', 'Hello', 'Hallo', 'こんにちは'],
+  ['title', 'preferString', 'Preferred Hello', '', 'こんにちは'],
+  ['body', 'string', '', '', ''],
+  ['image', '', 'image1.jpg', 'image2.jpg', 'image3.jpg'],
   ['url', '', 'https://example.com'],
+  ['survey_key', 'explicit', 'a', 'b', ''],
 ];
 
 test('Test toObjectRows', async (t: ExecutionContext) => {
@@ -60,24 +61,33 @@ test('Test toStrings', async (t: ExecutionContext) => {
       image: new LocalizableData(pod, {
         default: 'image1.jpg',
         de: 'image2.jpg',
+        ja: 'image3.jpg',
       }),
       url: new LocalizableData(pod, {default: 'https://example.com'}),
+      survey_key: new LocalizableData(pod, {
+        en: 'a',
+        de: 'b',
+      }),
     },
     keysToLocales: {
       'title:0': {
         en: 'Hello',
         de: 'Hallo',
+        ja: 'こんにちは',
       },
       'title:1': {
         en: 'Preferred Hello',
         de: '',
+        ja: 'こんにちは',
       },
       'body:2': {
         en: '',
         de: '',
+        ja: '',
       },
       'image:3': {},
       'url:4': {},
+      'survey_key:5': {},
     },
   });
 });

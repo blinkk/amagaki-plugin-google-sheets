@@ -5,6 +5,7 @@ import {GoogleSheetsValuesReponse} from './google-sheets';
 const RowType = {
   PREFER_STRING: 'preferString',
   STRING: 'string',
+  EXPLICIT: 'explicit',
   DATA: '',
 };
 
@@ -103,8 +104,12 @@ export const toStrings = (pod: Pod, values: GoogleSheetsValuesReponse) => {
           (existingField as TranslationString).value = value;
         } else if (isDefaultLocale && rowType === RowType.PREFER_STRING) {
           (existingField as TranslationString).prefer = value;
-        } else if (rowType === RowType.DATA) {
-          const localizableDataKey = isDefaultLocale ? 'default' : locale.id;
+        } else if (rowType === RowType.DATA || rowType === RowType.EXPLICIT) {
+          let localizableDataKey = locale.id;
+          if (rowType === RowType.DATA && isDefaultLocale) {
+            localizableDataKey = 'default';
+          }
+
           // Avoid adding empty keys.
           if (value) {
             (existingField as LocalizableData).data[localizableDataKey] = value;
@@ -115,9 +120,14 @@ export const toStrings = (pod: Pod, values: GoogleSheetsValuesReponse) => {
           existingField = pod.string({value: value});
         } else if (rowType === RowType.PREFER_STRING) {
           existingField = pod.string({prefer: value, value: value});
-        } else if (rowType === RowType.DATA) {
+        } else if (rowType === RowType.DATA || rowType === RowType.EXPLICIT) {
           const data: Record<string, string> = {};
-          const localizableDataKey = isDefaultLocale ? 'default' : locale.id;
+          let localizableDataKey = locale.id;
+
+          if (rowType === RowType.DATA && isDefaultLocale) {
+            localizableDataKey = 'default';
+          }
+
           // Avoid adding empty keys.
           if (value) {
             data[localizableDataKey] = value;
