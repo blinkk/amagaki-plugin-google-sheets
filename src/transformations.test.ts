@@ -1,6 +1,6 @@
 import * as transformations from './transformations';
 
-import {LocalizableData, Pod} from '@amagaki/amagaki';
+import {Locale, LocalizableData, Pod} from '@amagaki/amagaki';
 
 import {ExecutionContext} from 'ava';
 import test from 'ava';
@@ -22,7 +22,7 @@ const valuesResponseStrings = [
   ['title', 'string', 'Hello', 'Hallo', 'こんにちは'],
   ['title', 'preferString', 'Preferred Hello', '', 'こんにちは'],
   ['body', 'string', '', '', ''],
-  ['image', '', 'image1.jpg', 'image2.jpg', 'image3.jpg'],
+  ['image', '', 'image1.jpg', 'image2.jpg', ''],
   ['url', '', 'https://example.com'],
   ['survey_key', 'explicit', 'a', 'b', ''],
 ];
@@ -51,6 +51,12 @@ test('Test toGrid', async (t: ExecutionContext) => {
 
 test('Test toStrings', async (t: ExecutionContext) => {
   const pod = new Pod('../example');
+  console.log(
+    new LocalizableData(pod, {
+      en: 'a',
+      de: '',
+    }).localize(new Locale(pod, 'ja'))
+  );
   t.deepEqual(transformations.toStrings(pod, valuesResponseStrings), {
     keysToFields: {
       title: pod.string({
@@ -61,7 +67,6 @@ test('Test toStrings', async (t: ExecutionContext) => {
       image: new LocalizableData(pod, {
         default: 'image1.jpg',
         de: 'image2.jpg',
-        ja: 'image3.jpg',
       }),
       url: new LocalizableData(pod, {default: 'https://example.com'}),
       survey_key: new LocalizableData(pod, {
@@ -90,4 +95,18 @@ test('Test toStrings', async (t: ExecutionContext) => {
       'survey_key:5': {},
     },
   });
+});
+
+test('Test explicit data type', async (t: ExecutionContext) => {
+  const pod = new Pod('../example');
+  const transformObject = transformations.toStrings(pod, [
+    ['key', 'type', 'en', 'de', 'ja'],
+    ['survey_key', 'explicit', 'a', 'b', ''],
+  ]);
+
+  const surveyLocalizableData = transformObject.keysToFields
+    .survey_key as LocalizableData;
+  t.assert(surveyLocalizableData.localize(new Locale(pod, 'en')), 'a');
+  t.assert(surveyLocalizableData.localize(new Locale(pod, 'de')), 'b');
+  t.falsy(surveyLocalizableData.localize(new Locale(pod, 'ja')));
 });
