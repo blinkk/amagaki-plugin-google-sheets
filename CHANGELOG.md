@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v2.0.0...v2.1.0) (2021-08-11)
+
+
+### Features
+
+* add support for "explicit" data type ([e2255f7](https://www.github.com/blinkk/amagaki-plugin-google-sheets/commit/e2255f7294cbcfcbba78654c5cd9dfb15ac290b3))
+
 ## [2.0.0](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v1.2.0...v2.0.0) (2021-06-24)
 
 
