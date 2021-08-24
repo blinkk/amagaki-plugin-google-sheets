@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.0.0](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v2.1.0...v3.0.0) (2021-08-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* make usage consistent
+
+### Code Refactoring
+
+* make usage consistent ([4d02742](https://www.github.com/blinkk/amagaki-plugin-google-sheets/commit/4d02742fd146889f50c2aa47dc5d321cb169bdb5))
+
 ## [2.1.0](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v2.0.0...v2.1.0) (2021-08-11)
 
 
