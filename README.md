@@ -46,14 +46,14 @@ gcloud --project=$PROJECT \
 4. Add to `amagaki.ts`.
 
 ```typescript
-import * as googleSheetsPlugin from '@amagaki/amagaki-plugin-google-sheets';
+import {GoogleSheetsPlugin} from '@amagaki/amagaki-plugin-google-sheets';
 import {Pod, ServerPlugin} from '@amagaki/amagaki';
 
 export default (pod: Pod) => {
   // Run Google Sheets plugin when dev server starts.
   const serverPlugin = pod.plugins.get('ServerPlugin') as ServerPlugin;
   serverPlugin.register(async () => {
-    const sheets = googleSheetsPlugin.register(pod, {
+    const sheets = GoogleSheetsPlugin.register(pod, {
       keyFile: 'key.json',
     });
 
@@ -101,10 +101,13 @@ export default (pod: Pod) => {
 
 ## Transform options
 
-- [strings](#strings)
-- [grid](#grid)
-- [objectRows](#objectrows)
-- [rows (default)](#rows-default)
+- [amagaki-plugin-google-sheets](#amagaki-plugin-google-sheets)
+  - [Usage](#usage)
+  - [Transform options](#transform-options)
+    - [strings](#strings)
+    - [grid](#grid)
+    - [objectRows](#objectrows)
+    - [rows (default)](#rows-default)
 
 ### strings
 

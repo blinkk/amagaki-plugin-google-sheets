@@ -97,7 +97,7 @@ async function transform(
   return values;
 }
 
-class GoogleSheetsPlugin {
+export class GoogleSheetsPlugin {
   pod: Pod;
   authPlugin: googleAuthPlugin.GoogleAuthPlugin;
 
@@ -112,6 +112,10 @@ class GoogleSheetsPlugin {
       throw new Error('Unable to find GoogleAuthPlugin');
     }
   }
+
+  static register = (pod: Pod, authPluginOptions: GoogleAuthPluginOptions) => {
+    return new GoogleSheetsPlugin(pod, authPluginOptions);
+  };
 
   getClient() {
     const authClient = this.authPlugin.authClient;
@@ -220,10 +224,3 @@ class GoogleSheetsPlugin {
     }
   }
 }
-
-export const register = (
-  pod: Pod,
-  authPluginOptions: GoogleAuthPluginOptions
-) => {
-  return new GoogleSheetsPlugin(pod, authPluginOptions);
-};
