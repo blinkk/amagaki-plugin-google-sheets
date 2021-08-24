@@ -64,8 +64,8 @@ async function saveLocales(pod: Pod, keysToLocales: KeysToLocalesToStrings) {
       pod.getAbsoluteFilePath(locale.podPath),
       contentToWrite
     );
-    console.log(`Saved -> ${locale.podPath}`);
   }
+  return catalogsToMerge;
 }
 
 /**
@@ -84,7 +84,8 @@ async function transform(
   transformations.validate(transformation);
   if (transformation === transformations.Transformation.STRINGS) {
     const result = transformations.toStrings(pod, values);
-    await saveLocales(pod, result.keysToLocales);
+    const catalogs = await saveLocales(pod, result.keysToLocales);
+    console.log(`Saved locales -> ${Object.keys(catalogs).sort().join(', ')}`);
     return result.keysToFields;
   } else if (transformation === transformations.Transformation.GRID) {
     return transformations.toGrid(pod, values);
