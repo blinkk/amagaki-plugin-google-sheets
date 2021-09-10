@@ -85,7 +85,10 @@ async function transform(
   if (transformation === transformations.Transformation.STRINGS) {
     const result = transformations.toStrings(pod, values);
     const catalogs = await saveLocales(pod, result.keysToLocales);
-    console.log(`Saved locales -> ${Object.keys(catalogs).sort().join(', ')}`);
+    const localeIds = Object.keys(catalogs);
+    if (localeIds.length) {
+      console.log(`Saved locales -> ${localeIds.sort().join(', ')}`);
+    }
     return result.keysToFields;
   } else if (transformation === transformations.Transformation.GRID) {
     return transformations.toGrid(pod, values);
