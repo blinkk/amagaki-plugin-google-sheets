@@ -20,30 +20,9 @@ your Amagaki project to build a website.
 npm install --save @amagaki/amagaki-plugin-google-sheets
 ```
 
-2. Acquire a service account key file. You can do this interactively, from the
-   IAM section of the Google Cloud Console, or you can do this via the `gcloud`
-   CLI (see below for an example).
-
-```shell
-PROJECT=<Google Cloud Project ID>
-
-# Create a service account named `amagaki`.
-gcloud --project=$PROJECT \
-  iam service-accounts create \
-  amagaki
-
-# Create a JSON key and download it to `key.json`.
-gcloud --project=$PROJECT \
-  iam service-accounts keys create \
-  --iam-account amagaki@$PROJECT.iam.gserviceaccount.com \
-  key.json
-```
-
-2. Ensure the sheet is shared with the service account.
-
-3. Ensure `key.json` is added to your `.gitignore`.
-
-4. Add to `amagaki.ts`.
+2. Authenticate. See [authentication](#authentication) for details.
+ 
+3. Add to `amagaki.ts`.
 
 ```typescript
 import {GoogleSheetsPlugin} from '@amagaki/amagaki-plugin-google-sheets';
@@ -53,9 +32,7 @@ export default (pod: Pod) => {
   // Run Google Sheets plugin when dev server starts.
   const serverPlugin = pod.plugins.get('ServerPlugin') as ServerPlugin;
   serverPlugin.register(async () => {
-    const sheets = GoogleSheetsPlugin.register(pod, {
-      keyFile: 'key.json',
-    });
+    const sheets = GoogleSheetsPlugin.register(pod);
 
     await Promise.all([
       // Binds a collection to specified tabs within the Google Sheet. Deletes
@@ -108,6 +85,9 @@ export default (pod: Pod) => {
     - [grid](#grid)
     - [objectRows](#objectrows)
     - [rows (default)](#rows-default)
+  - [Authentication](#authentication)
+    - [Option 1: Using application default credentials](#option-1-using-application-default-credentials)
+    - [Option 2: Using a service account key file](#option-2-using-a-service-account-key-file)
 
 ### strings
 
@@ -122,13 +102,13 @@ localized strings. Additional non-string types can be added to manage localized
 data. The sheet must be in the following format:
 
 ```markdown
-| key  | type         | en        | de      | es    |
-| ---- | ------------ | --------- | ------- | ----- |
-| foo  | string       | Hello     | Hallo   | Hola  |
-| bar  | string       | Bye       | Tschüss | Adiós |
-| bar  | preferString | Goodbye   |         |       |
-| baz  |              | https://example.com | https://example.de | https://example.es |
-| qux  | explicit     | a         | b       |       |
+| key | type         | en                  | de                 | es                 |
+| --- | ------------ | ------------------- | ------------------ | ------------------ |
+| foo | string       | Hello               | Hallo              | Hola               |
+| bar | string       | Bye                 | Tschüss            | Adiós              |
+| bar | preferString | Goodbye             |                    |                    |
+| baz |              | https://example.com | https://example.de | https://example.es |
+| qux | explicit     | a                   | b                  |                    |
 ```
 
 The values are transformed to:
@@ -170,10 +150,10 @@ Converts a sheet formatted as a grid of strings into a mapping of keys to
 headers to values. The sheet must be in the following format:
 
 ```
-| <BLANK>  | header1 | header2 |
-| -------- | ------- | ------- |
-| foo      | a       | b       |
-| bar      | c       | d       |
+| <BLANK> | header1 | header2 |
+| ------- | ------- | ------- |
+| foo     | a       | b       |
+| bar     | c       | d       |
 ```
 
 The values are transformed to:
@@ -193,10 +173,10 @@ Converts a sheet formatted as a grid of strings into a list of objects
 mapping headers to values. The sheet must be in the following format:
 
 ```
-| header1  | header2 | header3 |
-| -------- | ------- | ------- |
-| foo      | a       | b       |
-| bar      | c       | d       |
+| header1 | header2 | header3 |
+| ------- | ------- | ------- |
+| foo     | a       | b       |
+| bar     | c       | d       |
 ```
 
 The values are transformed to:
@@ -216,10 +196,10 @@ Does not modify response from Google Sheets. The sheet is simply serialized as a
 list of lists.
 
 ```
-| header1  | header2 | header3 |
-| -------- | ------- | ------- |
-| foo      | a       | b       |
-| bar      | c       | d       |
+| header1 | header2 | header3 |
+| ------- | ------- | ------- |
+| foo     | a       | b       |
+| bar     | c       | d       |
 ```
 
 The values are transformed to:
@@ -234,6 +214,54 @@ The values are transformed to:
 - - bar
   - c
   - d
+```
+
+## Authentication
+
+There are two ways to authenticate. We recommend using the application default
+identity (option 1), but using a service account key file is acceptable as well.
+
+### Option 1: Using application default credentials
+
+
+1. Install the `gcloud SDK`. [See instructions](https://cloud.google.com/sdk/docs/downloads-interactive).
+2. Login and set the application default credentials. Ensure you provide the required scopes.
+
+```bash
+gcloud auth application-default login \
+  --scopes=openid,https://www.googleapis.com/auth/userinfo.email,https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/spreadsheets
+```
+
+3. That's it! Now, Amagaki will use the signed in Google Account to fetch content.
+
+### Option 2: Using a service account key file
+
+
+1. Acquire a service account key file. You can do this interactively, from the IAM section of the Google Cloud Console, or you can do this via the `gcloud` CLI (see below for an example).
+
+```
+PROJECT=<Google Cloud Project ID>
+
+# Create a service account named `amagaki`.
+gcloud --project=$PROJECT \
+  iam service-accounts create \
+  amagaki
+
+# Create a JSON key and download it to `key.json`.
+gcloud --project=$PROJECT \
+  iam service-accounts keys create \
+  --iam-account amagaki@$PROJECT.iam.gserviceaccount.com \
+  key.json
+```
+
+2. Ensure `key.json` is added to your `.gitignore`.
+3. Ensure the sheet is shared with the service account.
+4. Pass `keyFile` to the sheets plugin.
+
+```typescript
+GoogleSheetsPlugin.register(pod, {
+  keyFile: 'key.json',
+});
 ```
 
 [github-image]: https://github.com/blinkk/amagaki-plugin-google-sheets/workflows/Run%20tests/badge.svg
