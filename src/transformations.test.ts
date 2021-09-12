@@ -27,7 +27,7 @@ const valuesResponseStrings = [
   ['survey_key', 'explicit', 'a', 'b', ''],
 ];
 
-test('Test toObjectRows', async (t: ExecutionContext) => {
+test('Test toObjectRows', (t: ExecutionContext) => {
   const pod = new Pod('../example');
   t.deepEqual(transformations.toObjectRows(pod, valuesResponseAny), [
     {header1: 'foo', header2: 'a', header3: 'b'},
@@ -35,7 +35,7 @@ test('Test toObjectRows', async (t: ExecutionContext) => {
   ]);
 });
 
-test('Test toGrid', async (t: ExecutionContext) => {
+test('Test toGrid', (t: ExecutionContext) => {
   const pod = new Pod('../example');
   t.deepEqual(transformations.toGrid(pod, valuesResponseGrid), {
     foo: {
@@ -49,7 +49,7 @@ test('Test toGrid', async (t: ExecutionContext) => {
   });
 });
 
-test('Test toStrings', async (t: ExecutionContext) => {
+test('Test toStrings', (t: ExecutionContext) => {
   const pod = new Pod('../example');
   t.deepEqual(transformations.toStrings(pod, valuesResponseStrings), {
     keysToFields: {
@@ -91,7 +91,7 @@ test('Test toStrings', async (t: ExecutionContext) => {
   });
 });
 
-test('Test explicit data type', async (t: ExecutionContext) => {
+test('Test explicit data type', (t: ExecutionContext) => {
   const pod = new Pod('../example');
   const transformObject = transformations.toStrings(pod, [
     ['key', 'type', 'en', 'de', 'ja'],
