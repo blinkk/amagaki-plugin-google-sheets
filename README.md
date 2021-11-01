@@ -224,7 +224,7 @@ identity (option 1), but using a service account key file is acceptable as well.
 ### Option 1: Using application default credentials
 
 
-1. Install the `gcloud SDK`. [See instructions](https://cloud.google.com/sdk/docs/downloads-interactive).
+1. Install the `gcloud SDK`. [See instructions](https://cloud.google.com/sdk/docs/downloads-interactive).*
 2. Login and set the application default credentials. Ensure you provide the required scopes.
 
 ```bash
@@ -233,6 +233,15 @@ gcloud auth application-default login \
 ```
 
 3. That's it! Now, Amagaki will use the signed in Google Account to fetch content.
+
+*NOTE: If you've never authenticated using `gcloud` before, after installing the SDK, you may need to set a default Google Cloud project. Use the command below after installing the `gcloud SDK`:
+
+```
+# Replace $PROJECT with your GCP project ID.
+gcloud auth login
+gcloud config set project $PROJECT
+gcloud auth application-default set-quota-project $PROJECT
+```
 
 ### Option 2: Using a service account key file
 
