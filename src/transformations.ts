@@ -1,6 +1,5 @@
+import {CellTypes, GoogleSheetsValuesReponse} from './google-sheets';
 import {LocalizableData, Pod, TranslationString} from '@amagaki/amagaki';
-
-import {GoogleSheetsValuesReponse} from './google-sheets';
 
 const RowType = {
   PREFER_STRING: 'preferString',
@@ -52,7 +51,11 @@ export type GridType = Record<string, Record<string, string>>;
  * Furthermore, any translation strings are automatically saved to the pod's
  * locale files.
  */
-export const toStrings = (pod: Pod, values: GoogleSheetsValuesReponse) => {
+export const toStrings = (
+  pod: Pod,
+  values: GoogleSheetsValuesReponse,
+  cellTypes?: CellTypes
+) => {
   const keysToLocalesToStrings: KeysToLocalesToStrings = {};
   const keysToFields: keysToFields = {};
   const rawHeader = values.shift();
@@ -75,6 +78,9 @@ export const toStrings = (pod: Pod, values: GoogleSheetsValuesReponse) => {
       return;
     }
     const rowType = row.shift();
+    const isCustomCellType = Boolean(
+      rowType && cellTypes && rowType in cellTypes
+    );
     // Fill the array with empty strings to ensure all keys are added to YAML
     // files.
     const blankColumns = header.length - row.length;
@@ -93,7 +99,7 @@ export const toStrings = (pod: Pod, values: GoogleSheetsValuesReponse) => {
         return;
       }
       const locale = pod.locale(localeId);
-      const value = column;
+      let value = column;
 
       let existingField = keysToFields[key] as Dumpable;
       const isDefaultLocale = locale.id === pod.defaultLocale.id;
@@ -104,10 +110,19 @@ export const toStrings = (pod: Pod, values: GoogleSheetsValuesReponse) => {
           (existingField as TranslationString).value = value;
         } else if (isDefaultLocale && rowType === RowType.PREFER_STRING) {
           (existingField as TranslationString).prefer = value;
-        } else if (rowType === RowType.DATA || rowType === RowType.EXPLICIT) {
+        } else if (
+          rowType === RowType.DATA ||
+          rowType === RowType.EXPLICIT ||
+          isCustomCellType
+        ) {
           let localizableDataKey = locale.id;
           if (rowType === RowType.DATA && isDefaultLocale) {
             localizableDataKey = 'default';
+          }
+
+          // Custom cell type.
+          if (rowType && isCustomCellType && cellTypes) {
+            value = cellTypes[rowType](value);
           }
 
           // Avoid adding empty keys.
@@ -120,12 +135,21 @@ export const toStrings = (pod: Pod, values: GoogleSheetsValuesReponse) => {
           existingField = pod.string({value: value});
         } else if (rowType === RowType.PREFER_STRING) {
           existingField = pod.string({prefer: value, value: value});
-        } else if (rowType === RowType.DATA || rowType === RowType.EXPLICIT) {
+        } else if (
+          rowType === RowType.DATA ||
+          rowType === RowType.EXPLICIT ||
+          isCustomCellType
+        ) {
           const data: Record<string, string> = {};
           let localizableDataKey = locale.id;
 
           if (rowType === RowType.DATA && isDefaultLocale) {
             localizableDataKey = 'default';
+          }
+
+          // Custom cell type.
+          if (rowType && isCustomCellType && cellTypes) {
+            value = cellTypes[rowType](value);
           }
 
           // Avoid adding empty keys.

@@ -82,6 +82,7 @@ export default (pod: Pod) => {
   - [Usage](#usage)
   - [Transform options](#transform-options)
     - [strings](#strings)
+      - [Types](#types)
     - [grid](#grid)
     - [objectRows](#objectrows)
     - [rows (default)](#rows-default)
@@ -96,7 +97,6 @@ strings) inside a Google Sheet. Non-translation data can also be added, by
 leaving the `type` field blank.  For data that shouldn't fallback to the default
 `en` locale, use `explicit` in the `type` field.
 
-
 Converts a sheet formatted as a grid of strings into a mapping of keys to
 localized strings. Additional non-string types can be added to manage localized
 data. The sheet must be in the following format:
@@ -109,9 +109,10 @@ data. The sheet must be in the following format:
 | bar | preferString | Goodbye             |                    |                    |
 | baz |              | https://example.com | https://example.de | https://example.es |
 | qux | explicit     | a                   | b                  |                    |
+| qaz | capitalize   | a                   | b                  | c                  |
 ```
 
-The values are transformed to:
+The values are transformed to*:
 
 ```yaml
 foo: !pod.string Hello
@@ -125,6 +126,10 @@ baz: !IfLocale
 qux: !IfLocale
   en: a
   de: b
+qaz: !IfLocale
+  en: A
+  de: B
+  es: C
 ```
 
 Furthermore, any translation strings denoted by type "string" within the sheet
@@ -142,6 +147,32 @@ partials:
   body: !pod.yaml /content/strings/homepage.yaml?bar
   button:
     url: !pod.yaml /content/strings/homepage.yaml?baz
+```
+
+*NOTE: This example includes a sample `capitalize` custom cell type. See below
+for details on using custom cell types.*
+
+#### Types
+
+The `type` cell supports serialization as follows:
+
+- `string`: `!pod.string` objects
+- `preferString`: `!pod.string` objects, with the value used as the preferred default string
+- `explicit`: `!IfLocale` localized data, where blank values do not fall back
+- `(blank)`: `!IfLocale` localized data, where blank values fall back to the default locale
+
+You can define a custom cell type – your own serialization function to transform
+the data within a cell:
+
+1. Choose a name for the function.
+2. Use this name for the value of the `type` cell.
+3. Use the `addCellType` method on the plugin to register your type.
+
+```typescript
+  const sheets = GoogleSheetsPlugin.register(pod);
+  sheets.addCellType('capitalize', (data: string) => {
+    return data.toUpperCase();
+  });
 ```
 
 ### grid
@@ -236,7 +267,7 @@ gcloud auth application-default login \
 
 *NOTE: If you've never authenticated using `gcloud` before, after installing the SDK, you may need to set a default Google Cloud project. Use the command below after installing the `gcloud SDK`:
 
-```
+```bash
 # Replace $PROJECT with your GCP project ID.
 gcloud auth login
 gcloud config set project $PROJECT
@@ -248,7 +279,7 @@ gcloud auth application-default set-quota-project $PROJECT
 
 1. Acquire a service account key file. You can do this interactively, from the IAM section of the Google Cloud Console, or you can do this via the `gcloud` CLI (see below for an example).
 
-```
+```bash
 PROJECT=<Google Cloud Project ID>
 
 # Create a service account named `amagaki`.

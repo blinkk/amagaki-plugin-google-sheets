@@ -4,8 +4,9 @@ import {GoogleSheetsPlugin, Transformation} from '../dist';
 import {Pod} from '@amagaki/amagaki';
 
 export default (pod: Pod) => {
-  const sheets = GoogleSheetsPlugin.register(pod, {
-    keyFile: '/Users/jeremydw/Downloads/madebygoog-52e1c116d139.json',
+  const sheets = GoogleSheetsPlugin.register(pod);
+  sheets.addCellType('capitalize', (data: string) => {
+    return data.toUpperCase();
   });
   sheets.bindCollection({
     collectionPath: '/content/strings',

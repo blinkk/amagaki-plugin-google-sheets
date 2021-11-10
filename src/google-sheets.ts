@@ -26,6 +26,12 @@ export interface BindCollectionOptions {
 
 export type GoogleSheetsValuesReponse = string[][];
 
+export interface CellTypeFunction {
+  (value: string): any;
+}
+
+export type CellTypes = Record<string, CellTypeFunction>;
+
 /**
  * Updates the pod's locale files with translations retrieved from the sheet.
  */
@@ -76,14 +82,15 @@ async function saveLocales(pod: Pod, keysToLocales: KeysToLocalesToStrings) {
 async function transform(
   pod: Pod,
   values: GoogleSheetsValuesReponse,
-  transformation: unknown
+  transformation: unknown,
+  cellTypes?: CellTypes
 ) {
   if (!transformation) {
     return values;
   }
   transformations.validate(transformation);
   if (transformation === transformations.Transformation.STRINGS) {
-    const result = transformations.toStrings(pod, values);
+    const result = transformations.toStrings(pod, values, cellTypes);
     const catalogs = await saveLocales(pod, result.keysToLocales);
     const localeIds = Object.keys(catalogs);
     if (localeIds.length) {
@@ -103,9 +110,11 @@ async function transform(
 export class GoogleSheetsPlugin {
   pod: Pod;
   authPlugin: googleAuthPlugin.GoogleAuthPlugin;
+  cellTypes: CellTypes;
 
   constructor(pod: Pod, authPluginOptions: GoogleAuthPluginOptions) {
     this.pod = pod;
+    this.cellTypes = {};
     this.authPlugin =
       (pod.plugins.get(
         'GoogleAuthPlugin'
@@ -116,13 +125,17 @@ export class GoogleSheetsPlugin {
     }
   }
 
-  static register = (pod: Pod, authPluginOptions: GoogleAuthPluginOptions) => {
-    return new GoogleSheetsPlugin(pod, authPluginOptions);
+  static register = (pod: Pod, authPluginOptions?: GoogleAuthPluginOptions) => {
+    return new GoogleSheetsPlugin(pod, authPluginOptions ?? {});
   };
 
   getClient() {
     const authClient = this.authPlugin.authClient;
     return google.sheets({version: 'v4', auth: authClient});
+  }
+
+  addCellType(name: string, func: CellTypeFunction) {
+    this.cellTypes[name] = func;
   }
 
   fomatGoogleSheetsUrl(
@@ -174,7 +187,12 @@ export class GoogleSheetsPlugin {
         `Nothing found in sheet -> ${options.spreadsheetId} with range "${options.range}"`
       );
     }
-    const values = await transform(this.pod, responseValues, options.transform);
+    const values = await transform(
+      this.pod,
+      responseValues,
+      options.transform,
+      this.cellTypes
+    );
     await this.saveFileInternal(podPath, values);
   }
 

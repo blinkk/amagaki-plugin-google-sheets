@@ -27,7 +27,7 @@ const valuesResponseStrings = [
   ['survey_key', 'explicit', 'a', 'b', ''],
 ];
 
-test('Test toObjectRows', (t: ExecutionContext) => {
+test('toObjectRows', (t: ExecutionContext) => {
   const pod = new Pod('../example');
   t.deepEqual(transformations.toObjectRows(pod, valuesResponseAny), [
     {header1: 'foo', header2: 'a', header3: 'b'},
@@ -35,7 +35,7 @@ test('Test toObjectRows', (t: ExecutionContext) => {
   ]);
 });
 
-test('Test toGrid', (t: ExecutionContext) => {
+test('toGrid', (t: ExecutionContext) => {
   const pod = new Pod('../example');
   t.deepEqual(transformations.toGrid(pod, valuesResponseGrid), {
     foo: {
@@ -49,7 +49,7 @@ test('Test toGrid', (t: ExecutionContext) => {
   });
 });
 
-test('Test toStrings', (t: ExecutionContext) => {
+test('toStrings', (t: ExecutionContext) => {
   const pod = new Pod('../example');
   t.deepEqual(transformations.toStrings(pod, valuesResponseStrings), {
     keysToFields: {
@@ -91,7 +91,7 @@ test('Test toStrings', (t: ExecutionContext) => {
   });
 });
 
-test('Test explicit data type', (t: ExecutionContext) => {
+test('explicit data type', (t: ExecutionContext) => {
   const pod = new Pod('../example');
   const transformObject = transformations.toStrings(pod, [
     ['key', 'type', 'en', 'de', 'ja'],
@@ -103,4 +103,29 @@ test('Test explicit data type', (t: ExecutionContext) => {
   t.assert(surveyLocalizableData.localize(new Locale(pod, 'en')), 'a');
   t.assert(surveyLocalizableData.localize(new Locale(pod, 'de')), 'b');
   t.falsy(surveyLocalizableData.localize(new Locale(pod, 'ja')));
+});
+
+test('custom cell type', (t: ExecutionContext) => {
+  const pod = new Pod('../example');
+  const transformObject = transformations.toStrings(
+    pod,
+    [
+      ['key', 'type', 'en', 'de', 'ja'],
+      ['foo', 'custom', 'a', 'b', 'c'],
+    ],
+    {
+      custom: (data: string) => {
+        return data.toUpperCase();
+      },
+    }
+  );
+  const result = transformObject.keysToFields.foo as LocalizableData;
+  t.deepEqual(
+    result,
+    new LocalizableData(pod, {
+      de: 'B',
+      en: 'A',
+      ja: 'C',
+    })
+  );
 });
