@@ -1,5 +1,17 @@
 # Changelog
 
+### [3.0.1](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v3.0.0...v3.0.1) (2021-11-16)
+
+
+### Features
+
+* support custom cell types ([#16](https://www.github.com/blinkk/amagaki-plugin-google-sheets/issues/16)) ([2fa7caf](https://www.github.com/blinkk/amagaki-plugin-google-sheets/commit/2fa7caf872d36bc4250e86f583c748d832b01922))
+
+
+### Miscellaneous Chores
+
+* release 3.0.1 ([9306dd2](https://www.github.com/blinkk/amagaki-plugin-google-sheets/commit/9306dd29f2f1a197934aedf19678a7454600810a))
+
 ## [3.0.0](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v2.1.0...v3.0.0) (2021-08-24)
 
 
