@@ -1,6 +1,7 @@
+import {CellTypes, GoogleSheetsValuesReponse} from './google-sheets';
 import {LocalizableData, Pod, TranslationString} from '@amagaki/amagaki';
 
-import {GoogleSheetsValuesReponse} from './google-sheets';
+import {ColumnsToCellTypes} from '.';
 
 const RowType = {
   PREFER_STRING: 'preferString',
@@ -52,7 +53,11 @@ export type GridType = Record<string, Record<string, string>>;
  * Furthermore, any translation strings are automatically saved to the pod's
  * locale files.
  */
-export const toStrings = (pod: Pod, values: GoogleSheetsValuesReponse) => {
+export const toStrings = (
+  pod: Pod,
+  values: GoogleSheetsValuesReponse,
+  cellTypes?: CellTypes
+) => {
   const keysToLocalesToStrings: KeysToLocalesToStrings = {};
   const keysToFields: keysToFields = {};
   const rawHeader = values.shift();
@@ -75,6 +80,9 @@ export const toStrings = (pod: Pod, values: GoogleSheetsValuesReponse) => {
       return;
     }
     const rowType = row.shift();
+    const isCustomCellType = Boolean(
+      rowType && cellTypes && rowType in cellTypes
+    );
     // Fill the array with empty strings to ensure all keys are added to YAML
     // files.
     const blankColumns = header.length - row.length;
@@ -93,7 +101,7 @@ export const toStrings = (pod: Pod, values: GoogleSheetsValuesReponse) => {
         return;
       }
       const locale = pod.locale(localeId);
-      const value = column;
+      let value = column;
 
       let existingField = keysToFields[key] as Dumpable;
       const isDefaultLocale = locale.id === pod.defaultLocale.id;
@@ -104,10 +112,19 @@ export const toStrings = (pod: Pod, values: GoogleSheetsValuesReponse) => {
           (existingField as TranslationString).value = value;
         } else if (isDefaultLocale && rowType === RowType.PREFER_STRING) {
           (existingField as TranslationString).prefer = value;
-        } else if (rowType === RowType.DATA || rowType === RowType.EXPLICIT) {
+        } else if (
+          rowType === RowType.DATA ||
+          rowType === RowType.EXPLICIT ||
+          isCustomCellType
+        ) {
           let localizableDataKey = locale.id;
           if (rowType === RowType.DATA && isDefaultLocale) {
             localizableDataKey = 'default';
+          }
+
+          // Custom cell type.
+          if (rowType && isCustomCellType && cellTypes) {
+            value = cellTypes[rowType](value);
           }
 
           // Avoid adding empty keys.
@@ -120,12 +137,21 @@ export const toStrings = (pod: Pod, values: GoogleSheetsValuesReponse) => {
           existingField = pod.string({value: value});
         } else if (rowType === RowType.PREFER_STRING) {
           existingField = pod.string({prefer: value, value: value});
-        } else if (rowType === RowType.DATA || rowType === RowType.EXPLICIT) {
+        } else if (
+          rowType === RowType.DATA ||
+          rowType === RowType.EXPLICIT ||
+          isCustomCellType
+        ) {
           const data: Record<string, string> = {};
           let localizableDataKey = locale.id;
 
           if (rowType === RowType.DATA && isDefaultLocale) {
             localizableDataKey = 'default';
+          }
+
+          // Custom cell type.
+          if (rowType && isCustomCellType && cellTypes) {
+            value = cellTypes[rowType](value);
           }
 
           // Avoid adding empty keys.
@@ -175,7 +201,12 @@ export const toStrings = (pod: Pod, values: GoogleSheetsValuesReponse) => {
  *   header2: d
  * ```
  */
-export const toGrid = (pod: Pod, values: GoogleSheetsValuesReponse) => {
+export const toGrid = (
+  pod: Pod,
+  values: GoogleSheetsValuesReponse,
+  cellTypes?: CellTypes,
+  columnsToCellTypes?: ColumnsToCellTypes
+) => {
   const rawHeader = values.shift();
   if (!rawHeader) {
     throw new Error('Unable to find header row, sheet is likely empty.');
@@ -197,7 +228,11 @@ export const toGrid = (pod: Pod, values: GoogleSheetsValuesReponse) => {
     }
     grid[key] = {};
     row.forEach((value, i) => {
-      grid[key][header[i]] = value;
+      const headerCell = header[i];
+      if (cellTypes && columnsToCellTypes && columnsToCellTypes[headerCell]) {
+        value = cellTypes[columnsToCellTypes[headerCell]](value);
+      }
+      grid[key][headerCell] = value;
     });
   });
   return grid;
@@ -223,7 +258,12 @@ export const toGrid = (pod: Pod, values: GoogleSheetsValuesReponse) => {
  *   header3: d
  * ```
  */
-export const toObjectRows = (pod: Pod, values: GoogleSheetsValuesReponse) => {
+export const toObjectRows = (
+  pod: Pod,
+  values: GoogleSheetsValuesReponse,
+  cellTypes?: CellTypes,
+  columnsToCellTypes?: ColumnsToCellTypes
+) => {
   const header = values.shift();
   if (!header) {
     throw new Error('Unable to find header row, sheet is likely empty.');
@@ -233,7 +273,11 @@ export const toObjectRows = (pod: Pod, values: GoogleSheetsValuesReponse) => {
   values.forEach(row => {
     const objectRow: ObjectRow = {};
     row.forEach((value, i) => {
-      objectRow[header[i]] = value;
+      const headerCell = header[i];
+      if (cellTypes && columnsToCellTypes && columnsToCellTypes[headerCell]) {
+        value = cellTypes[columnsToCellTypes[headerCell]](value);
+      }
+      objectRow[headerCell] = value;
     });
     objectRows.push(objectRow);
   });
