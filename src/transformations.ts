@@ -1,6 +1,8 @@
 import {CellTypes, GoogleSheetsValuesReponse} from './google-sheets';
 import {LocalizableData, Pod, TranslationString} from '@amagaki/amagaki';
 
+import {ColumnsToCellTypes} from '.';
+
 const RowType = {
   PREFER_STRING: 'preferString',
   STRING: 'string',
@@ -199,7 +201,12 @@ export const toStrings = (
  *   header2: d
  * ```
  */
-export const toGrid = (pod: Pod, values: GoogleSheetsValuesReponse) => {
+export const toGrid = (
+  pod: Pod,
+  values: GoogleSheetsValuesReponse,
+  cellTypes?: CellTypes,
+  columnsToCellTypes?: ColumnsToCellTypes
+) => {
   const rawHeader = values.shift();
   if (!rawHeader) {
     throw new Error('Unable to find header row, sheet is likely empty.');
@@ -221,7 +228,11 @@ export const toGrid = (pod: Pod, values: GoogleSheetsValuesReponse) => {
     }
     grid[key] = {};
     row.forEach((value, i) => {
-      grid[key][header[i]] = value;
+      const headerCell = header[i];
+      if (cellTypes && columnsToCellTypes && columnsToCellTypes[headerCell]) {
+        value = cellTypes[columnsToCellTypes[headerCell]](value);
+      }
+      grid[key][headerCell] = value;
     });
   });
   return grid;
@@ -247,7 +258,12 @@ export const toGrid = (pod: Pod, values: GoogleSheetsValuesReponse) => {
  *   header3: d
  * ```
  */
-export const toObjectRows = (pod: Pod, values: GoogleSheetsValuesReponse) => {
+export const toObjectRows = (
+  pod: Pod,
+  values: GoogleSheetsValuesReponse,
+  cellTypes?: CellTypes,
+  columnsToCellTypes?: ColumnsToCellTypes
+) => {
   const header = values.shift();
   if (!header) {
     throw new Error('Unable to find header row, sheet is likely empty.');
@@ -257,7 +273,11 @@ export const toObjectRows = (pod: Pod, values: GoogleSheetsValuesReponse) => {
   values.forEach(row => {
     const objectRow: ObjectRow = {};
     row.forEach((value, i) => {
-      objectRow[header[i]] = value;
+      const headerCell = header[i];
+      if (cellTypes && columnsToCellTypes && columnsToCellTypes[headerCell]) {
+        value = cellTypes[columnsToCellTypes[headerCell]](value);
+      }
+      objectRow[headerCell] = value;
     });
     objectRows.push(objectRow);
   });

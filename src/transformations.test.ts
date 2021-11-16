@@ -105,7 +105,7 @@ test('explicit data type', (t: ExecutionContext) => {
   t.falsy(surveyLocalizableData.localize(new Locale(pod, 'ja')));
 });
 
-test('custom cell type', (t: ExecutionContext) => {
+test('custom cell type with strings transformation', (t: ExecutionContext) => {
   const pod = new Pod('../example');
   const transformObject = transformations.toStrings(
     pod,
@@ -128,4 +128,52 @@ test('custom cell type', (t: ExecutionContext) => {
       ja: 'C',
     })
   );
+});
+
+test('custom cell type with grid transformation', (t: ExecutionContext) => {
+  const pod = new Pod('../example');
+  const result = transformations.toGrid(
+    pod,
+    [
+      ['', 'foo', 'bar', 'baz'],
+      ['item1', 'foovalue', 'barvalue', 'bazvalue'],
+    ],
+    {
+      custom: (data: string) => {
+        return data.toUpperCase();
+      },
+    },
+    {foo: 'custom'}
+  );
+  t.deepEqual(result, {
+    item1: {
+      foo: 'FOOVALUE',
+      bar: 'barvalue',
+      baz: 'bazvalue',
+    },
+  });
+});
+
+test('custom cell type with objectRows transformation', (t: ExecutionContext) => {
+  const pod = new Pod('../example');
+  const result = transformations.toObjectRows(
+    pod,
+    [
+      ['header1', 'header2', 'url'],
+      ['value1', 'value2', 'urlvalue'],
+    ],
+    {
+      custom: (data: string) => {
+        return data.toUpperCase();
+      },
+    },
+    {url: 'custom'}
+  );
+  t.deepEqual(result, [
+    {
+      header1: 'value1',
+      header2: 'value2',
+      url: 'URLVALUE',
+    },
+  ]);
 });

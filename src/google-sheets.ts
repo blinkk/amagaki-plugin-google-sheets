@@ -8,13 +8,20 @@ import {GoogleAuthPluginOptions} from './google-auth';
 import {KeysToLocalesToStrings} from './transformations';
 import fs from 'fs';
 import fsPath from 'path';
-import yaml from 'js-yaml';
+
+/**
+ * A mapping of column names to cell types. Used in the `grid`, `objectRows`,
+ * and `rows` transformation, you can specify a `cellType` deserialization
+ * function for cells with a certain column.
+ */
+export type ColumnsToCellTypes = Record<string, string>;
 
 export interface SaveFileOptions {
   podPath: string;
   spreadsheetId: string;
   range: string;
   transform?: transformations.TransformationType;
+  columnsToCellTypes?: ColumnsToCellTypes;
 }
 
 export interface BindCollectionOptions {
@@ -22,6 +29,7 @@ export interface BindCollectionOptions {
   spreadsheetId: string;
   ranges: string[];
   transform?: transformations.TransformationType;
+  columnsToCellTypes?: ColumnsToCellTypes;
 }
 
 export type GoogleSheetsValuesReponse = string[][];
@@ -83,7 +91,8 @@ async function transform(
   pod: Pod,
   values: GoogleSheetsValuesReponse,
   transformation: unknown,
-  cellTypes?: CellTypes
+  cellTypes?: CellTypes,
+  columnsToCellTypes?: ColumnsToCellTypes
 ) {
   if (!transformation) {
     return values;
@@ -98,9 +107,14 @@ async function transform(
     }
     return result.keysToFields;
   } else if (transformation === transformations.Transformation.GRID) {
-    return transformations.toGrid(pod, values);
+    return transformations.toGrid(pod, values, cellTypes, columnsToCellTypes);
   } else if (transformation === transformations.Transformation.OBJECT_ROWS) {
-    return transformations.toObjectRows(pod, values);
+    return transformations.toObjectRows(
+      pod,
+      values,
+      cellTypes,
+      columnsToCellTypes
+    );
   } else if (typeof transformation === 'function') {
     return transformation(values);
   }
@@ -191,7 +205,8 @@ export class GoogleSheetsPlugin {
       this.pod,
       responseValues,
       options.transform,
-      this.cellTypes
+      this.cellTypes,
+      options.columnsToCellTypes
     );
     await this.saveFileInternal(podPath, values);
   }
@@ -231,7 +246,9 @@ export class GoogleSheetsPlugin {
       const values = await transform(
         this.pod,
         valueRange.values,
-        options.transform
+        options.transform,
+        this.cellTypes,
+        options.columnsToCellTypes
       );
       newFiles.push(basename);
       await this.saveFileInternal(podPath, values);

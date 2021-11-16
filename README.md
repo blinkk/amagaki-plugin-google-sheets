@@ -21,7 +21,7 @@ npm install --save @amagaki/amagaki-plugin-google-sheets
 ```
 
 2. Authenticate. See [authentication](#authentication) for details.
- 
+
 3. Add to `amagaki.ts`.
 
 ```typescript
@@ -73,7 +73,6 @@ export default (pod: Pod) => {
     ]);
   });
 };
-
 ```
 
 ## Transform options
@@ -94,7 +93,7 @@ export default (pod: Pod) => {
 
 Use the `strings` format when managing website copy (and optionally translation
 strings) inside a Google Sheet. Non-translation data can also be added, by
-leaving the `type` field blank.  For data that shouldn't fallback to the default
+leaving the `type` field blank. For data that shouldn't fallback to the default
 `en` locale, use `explicit` in the `type` field.
 
 Converts a sheet formatted as a grid of strings into a mapping of keys to
@@ -112,7 +111,7 @@ data. The sheet must be in the following format:
 | qaz | capitalize   | a                   | b                  | c                  |
 ```
 
-The values are transformed to*:
+The values are transformed to\*:
 
 ```yaml
 foo: !pod.string Hello
@@ -142,19 +141,19 @@ are automatically translated, and `!IfLocale` types are automatically localized.
 
 ```yaml
 partials:
-- partial: hero
-  headline: !pod.yaml /content/strings/homepage.yaml?foo
-  body: !pod.yaml /content/strings/homepage.yaml?bar
-  button:
-    url: !pod.yaml /content/strings/homepage.yaml?baz
+  - partial: hero
+    headline: !pod.yaml /content/strings/homepage.yaml?foo
+    body: !pod.yaml /content/strings/homepage.yaml?bar
+    button:
+      url: !pod.yaml /content/strings/homepage.yaml?baz
 ```
 
-*NOTE: This example includes a sample `capitalize` custom cell type. See below
-for details on using custom cell types.*
+_NOTE: This example includes a sample `capitalize` custom cell type. See below
+for details on using custom cell types._
 
 #### Types
 
-The `type` cell supports serialization as follows:
+In the `strings` transformation, the `type` cell supports serialization as follows:
 
 - `string`: `!pod.string` objects
 - `preferString`: `!pod.string` objects, with the value used as the preferred default string
@@ -169,10 +168,28 @@ the data within a cell:
 3. Use the `addCellType` method on the plugin to register your type.
 
 ```typescript
-  const sheets = GoogleSheetsPlugin.register(pod);
-  sheets.addCellType('capitalize', (data: string) => {
-    return data.toUpperCase();
-  });
+const sheets = GoogleSheetsPlugin.register(pod);
+sheets.addCellType('capitalize', (data: string) => {
+  return data.toUpperCase();
+});
+```
+
+Custom cell types can also be used with the `objectRows` and `grid` transformations by specifying which header cells correspond to which cell types:
+
+1. Use `addCellType` to register the cell type with a name.
+2. When calling `saveFile` or `bindCollection`, supply a mapping of header cells to named cell types. See example below.
+
+```
+sheets.saveFile({
+  podPath: '/content/partials/about.yaml',
+  spreadsheetId: '1qP7IPYJ1nIA5useXKbm8nHyj96Ue_6YMEFkwgpUoL-c',
+  range: 'about',
+  transform: 'grid',
+  columnsToCellTypes: {
+    // Use the `capitalize` cell type for all cells with header `header1`.
+    header1: 'capitalize',
+  }
+}),
 ```
 
 ### grid
@@ -254,8 +271,7 @@ identity (option 1), but using a service account key file is acceptable as well.
 
 ### Option 1: Using application default credentials
 
-
-1. Install the `gcloud SDK`. [See instructions](https://cloud.google.com/sdk/docs/downloads-interactive).*
+1. Install the `gcloud SDK`. [See instructions](https://cloud.google.com/sdk/docs/downloads-interactive).\*
 2. Login and set the application default credentials. Ensure you provide the required scopes.
 
 ```bash
@@ -265,7 +281,7 @@ gcloud auth application-default login \
 
 3. That's it! Now, Amagaki will use the signed in Google Account to fetch content.
 
-*NOTE: If you've never authenticated using `gcloud` before, after installing the SDK, you may need to set a default Google Cloud project. Use the command below after installing the `gcloud SDK`:
+\*NOTE: If you've never authenticated using `gcloud` before, after installing the SDK, you may need to set a default Google Cloud project. Use the command below after installing the `gcloud SDK`:
 
 ```bash
 # Replace $PROJECT with your GCP project ID.
@@ -275,7 +291,6 @@ gcloud auth application-default set-quota-project $PROJECT
 ```
 
 ### Option 2: Using a service account key file
-
 
 1. Acquire a service account key file. You can do this interactively, from the IAM section of the Google Cloud Console, or you can do this via the `gcloud` CLI (see below for an example).
 
