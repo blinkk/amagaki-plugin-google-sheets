@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.0](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v3.0.1...v3.1.0) (2021-12-30)
+
+
+### Features
+
+* trim whitespace when importing strings ([2691948](https://www.github.com/blinkk/amagaki-plugin-google-sheets/commit/26919485417ddf72984bba57b2e41b660c077493))
+
 ### [3.0.1](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v3.0.0...v3.0.1) (2021-11-16)
 
 
