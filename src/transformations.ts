@@ -105,6 +105,12 @@ export const toStrings = (
 
       let existingField = keysToFields[key] as Dumpable;
       const isDefaultLocale = locale.id === pod.defaultLocale.id;
+
+      // Avoid adding empty keys.
+      if (!value) {
+        return;
+      }
+
       if (existingField) {
         // Combine two rows with the same key into one `TranslationString`
         // object, setting the `value` and `prefer` values individually.

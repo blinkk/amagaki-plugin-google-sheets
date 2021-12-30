@@ -57,7 +57,6 @@ test('toStrings', (t: ExecutionContext) => {
         prefer: 'Preferred Hello',
         value: 'Hello',
       }),
-      body: pod.string({value: ''}),
       image: new LocalizableData(pod, {
         default: 'image1.jpg',
         de: 'image2.jpg',
@@ -76,14 +75,9 @@ test('toStrings', (t: ExecutionContext) => {
       },
       'title:1': {
         en: 'Preferred Hello',
-        de: '',
         ja: 'こんにちは',
       },
-      'body:2': {
-        en: '',
-        de: '',
-        ja: '',
-      },
+      'body:2': {},
       'image:3': {},
       'url:4': {},
       'survey_key:5': {},
