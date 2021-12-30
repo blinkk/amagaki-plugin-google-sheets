@@ -1,5 +1,12 @@
 # Changelog
 
+### [3.1.1](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v3.1.0...v3.1.1) (2021-12-30)
+
+
+### Bug Fixes
+
+* avoid importing empty strings ([2c3f48c](https://www.github.com/blinkk/amagaki-plugin-google-sheets/commit/2c3f48c428f829c1f2efd6a926bd2c1c59c7038a))
+
 ## [3.1.0](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v3.0.1...v3.1.0) (2021-12-30)
 
 
