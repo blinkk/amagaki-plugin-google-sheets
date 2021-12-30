@@ -4,6 +4,7 @@
       "esModuleInterop": true,
       "outDir": "dist",
       "skipLibCheck": true,
+      "lib": ["es2018"],
       "types": [],
     },
     "exclude": [

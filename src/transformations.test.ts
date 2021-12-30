@@ -8,18 +8,18 @@ import test from 'ava';
 const valuesResponseAny = [
   ['header1', 'header2', 'header3'],
   ['foo', 'a', 'b'],
-  ['bar', 'c', 'd'],
+  ['bar ', 'c', 'd'],
 ];
 
 const valuesResponseGrid = [
   ['', 'header2', 'header3'],
-  ['foo', 'a', 'b'],
+  ['foo ', 'a', 'b'],
   ['bar', 'c', 'd'],
 ];
 
 const valuesResponseStrings = [
   ['key', 'type', 'en', 'de', 'ja'],
-  ['title', 'string', 'Hello', 'Hallo', 'こんにちは'],
+  ['title', 'string', 'Hello ', 'Hallo', 'こんにちは'],
   ['title', 'preferString', 'Preferred Hello', '', 'こんにちは'],
   ['body', 'string', '', '', ''],
   ['image', '', 'image1.jpg', 'image2.jpg', ''],

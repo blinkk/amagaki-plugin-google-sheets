@@ -74,12 +74,12 @@ export const toStrings = (
   const header = rawHeader.slice(2);
   values.forEach((row, n) => {
     const localesToStrings: Record<string, any> = {};
-    const key = row.shift() as string;
+    const key = row.shift()?.trim() as string;
     // Skip rows without keys.
     if (!key) {
       return;
     }
-    const rowType = row.shift();
+    const rowType = row.shift()?.trim();
     const isCustomCellType = Boolean(
       rowType && cellTypes && rowType in cellTypes
     );
@@ -101,7 +101,7 @@ export const toStrings = (
         return;
       }
       const locale = pod.locale(localeId);
-      let value = column;
+      let value = column.trim();
 
       let existingField = keysToFields[key] as Dumpable;
       const isDefaultLocale = locale.id === pod.defaultLocale.id;
@@ -170,7 +170,7 @@ export const toStrings = (
         rowType &&
         [RowType.STRING, RowType.PREFER_STRING].includes(rowType)
       ) {
-        localesToStrings[locale.id] = value;
+        localesToStrings[locale.id] = value.trim();
       }
     });
     keysToLocalesToStrings[`${key}:${n}`] = localesToStrings;
@@ -221,7 +221,7 @@ export const toGrid = (
   const header = rawHeader.slice(1);
   const grid: GridType = {};
   values.forEach(row => {
-    const key = row.shift();
+    const key = row.shift()?.trim();
     // Skip empty rows.
     if (!key) {
       return;
@@ -232,7 +232,7 @@ export const toGrid = (
       if (cellTypes && columnsToCellTypes && columnsToCellTypes[headerCell]) {
         value = cellTypes[columnsToCellTypes[headerCell]](value);
       }
-      grid[key][headerCell] = value;
+      grid[key][headerCell] = value.trim();
     });
   });
   return grid;
@@ -277,7 +277,7 @@ export const toObjectRows = (
       if (cellTypes && columnsToCellTypes && columnsToCellTypes[headerCell]) {
         value = cellTypes[columnsToCellTypes[headerCell]](value);
       }
-      objectRow[headerCell] = value;
+      objectRow[headerCell] = value.trim();
     });
     objectRows.push(objectRow);
   });
