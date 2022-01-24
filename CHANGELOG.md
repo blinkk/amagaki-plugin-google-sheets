@@ -1,5 +1,12 @@
 # Changelog
 
+### [3.1.2](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v3.1.1...v3.1.2) (2022-01-24)
+
+
+### Bug Fixes
+
+* serializing custom cell types ([d44a82a](https://www.github.com/blinkk/amagaki-plugin-google-sheets/commit/d44a82ad85cb917ed95ba207a672cc7f4f397ea7))
+
 ### [3.1.1](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v3.1.0...v3.1.1) (2021-12-30)
 
 
