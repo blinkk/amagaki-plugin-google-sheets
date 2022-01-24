@@ -238,7 +238,12 @@ export const toGrid = (
       if (cellTypes && columnsToCellTypes && columnsToCellTypes[headerCell]) {
         value = cellTypes[columnsToCellTypes[headerCell]](value);
       }
-      grid[key][headerCell] = value.trim();
+      // `value` may be transformed by a custom cell type.
+      if (typeof value === 'string') {
+        grid[key][headerCell] = value.trim();
+      } else {
+        grid[key][headerCell] = value;
+      }
     });
   });
   return grid;
@@ -283,7 +288,12 @@ export const toObjectRows = (
       if (cellTypes && columnsToCellTypes && columnsToCellTypes[headerCell]) {
         value = cellTypes[columnsToCellTypes[headerCell]](value);
       }
-      objectRow[headerCell] = value.trim();
+      // `value` may be transformed by a custom cell type.
+      if (typeof value === 'string') {
+        objectRow[headerCell] = value.trim();
+      } else {
+        objectRow[headerCell] = value;
+      }
     });
     objectRows.push(objectRow);
   });
