@@ -103,6 +103,13 @@ export const toStrings = (
       const locale = pod.locale(localeId);
       let value = column.trim();
 
+      // Fixes an issue where the Sheets API removes a single quote from the 
+      // start of the string. 
+      // https://github.com/blinkk/amagaki-plugin-google-sheets/issues/22
+      if (value.endsWith("'") && !value.startsWith("'")) {
+        value = `'${value}`;
+      }
+      
       let existingField = keysToFields[key] as Dumpable;
       const isDefaultLocale = locale.id === pod.defaultLocale.id;
 
