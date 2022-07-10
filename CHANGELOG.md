@@ -1,5 +1,12 @@
 # Changelog
 
+### [3.1.4](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v3.1.3...v3.1.4) (2022-07-10)
+
+
+### Bug Fixes
+
+* move deps to devDependencies ([6f85587](https://www.github.com/blinkk/amagaki-plugin-google-sheets/commit/6f85587ac30c680379136d1b68b00f5e2419deff))
+
 ### [3.1.3](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v3.1.2...v3.1.3) (2022-07-10)
 
 
