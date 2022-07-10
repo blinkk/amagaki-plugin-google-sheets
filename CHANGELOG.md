@@ -1,5 +1,12 @@
 # Changelog
 
+### [3.1.3](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v3.1.2...v3.1.3) (2022-07-10)
+
+
+### Bug Fixes
+
+* use peerDepdencies for amagaki dependency to fix instanceOf issue ([66f79c1](https://www.github.com/blinkk/amagaki-plugin-google-sheets/commit/66f79c136fdc9f0d6196b00a460720ca120c00ab))
+
 ### [3.1.2](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v3.1.1...v3.1.2) (2022-01-24)
 
 
