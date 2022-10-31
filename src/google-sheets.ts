@@ -25,10 +25,15 @@ export interface SaveFileOptions {
 }
 
 export interface BindCollectionOptions {
+  /** Where to save the data generated from sheets. */
   collectionPath: string;
+  /** The Google Sheets ID to sync. */
   spreadsheetId: string;
+  /** A list of ranges (tab names) to sync. Tab names must match exactly. */
   ranges: string[];
   transform?: transformations.TransformationType;
+  /** Whether to delete files in the collection when Google Sheets tabs are deleted. */
+  cleanup?: boolean;
   columnsToCellTypes?: ColumnsToCellTypes;
 }
 
@@ -254,11 +259,13 @@ export class GoogleSheetsPlugin {
       await this.saveFileInternal(podPath, values);
     }
     const diff = existingFiles.filter(basename => !newFiles.includes(basename));
-    for (const basename of diff) {
-      const absPath = fsPath.join(realPath, basename);
-      const podPath = fsPath.join(options.collectionPath, basename);
-      fs.unlinkSync(absPath);
-      console.log(`Deleted -> ${podPath}`);
+    if (options.cleanup !== false) {
+      for (const basename of diff) {
+        const absPath = fsPath.join(realPath, basename);
+        const podPath = fsPath.join(options.collectionPath, basename);
+        fs.unlinkSync(absPath);
+        console.log(`Deleted -> ${podPath}`);
+      }
     }
   }
 }
