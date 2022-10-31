@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.0](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v3.1.4...v3.2.0) (2022-10-31)
+
+
+### Features
+
+* add cleanup option to BindCollection ([ca9a288](https://www.github.com/blinkk/amagaki-plugin-google-sheets/commit/ca9a288894b85cd320883e07b4d0e2bea648b4c5))
+
 ### [3.1.4](https://www.github.com/blinkk/amagaki-plugin-google-sheets/compare/v3.1.3...v3.1.4) (2022-07-10)
 
 
